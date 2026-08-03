@@ -103,4 +103,30 @@ describe("configSchema", () => {
 
     expect(result.success).toBe(false);
   });
+
+  it("valide 'routes' selon le modèle de route de la RFC-004", () => {
+    const config = fullConfig() as { routes: unknown[] };
+    config.routes = [
+      { id: "member-calendar", path: "/member/calendar", enableSnapshot: true, user: "member" },
+      {
+        id: "member-stay",
+        path: "/member/stays/[stayId]",
+        isDynamic: true,
+        parameters: { stayId: "seed-stay-123" },
+        enableSnapshot: true,
+      },
+    ];
+
+    expect(configSchema.safeParse(config).success).toBe(true);
+  });
+
+  it("rejette 'routes' contenant un identifiant dupliqué", () => {
+    const config = fullConfig() as { routes: unknown[] };
+    config.routes = [
+      { id: "duplicate", path: "/a", enableSnapshot: true },
+      { id: "duplicate", path: "/b", enableSnapshot: true },
+    ];
+
+    expect(configSchema.safeParse(config).success).toBe(false);
+  });
 });
