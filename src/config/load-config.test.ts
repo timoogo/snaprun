@@ -34,6 +34,7 @@ function validConfig(
         password: "input[name='password']",
         submit: "button[type='submit']",
       },
+      successUrl: "/dashboard",
       users: {},
     },
     routes: [],

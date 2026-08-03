@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { authSchema } from "./auth.js";
 import { routesSchema } from "./route.js";
 
 /**
@@ -29,24 +30,6 @@ const outputSchema = z
     fullPage: z.boolean().default(true),
   })
   .default({});
-
-const authSelectorsSchema = z.object({
-  email: z.string(),
-  password: z.string(),
-  submit: z.string(),
-});
-
-/**
- * Section optionnelle (une configuration sans authentification est valide).
- * Quand elle est présente, sa structure reste requise dans son intégralité.
- * La structure des utilisateurs (`auth.users`) est définie par RFC-007
- * (authentification) : à ce stade, seule la présence d'un objet est validée.
- */
-const authSchema = z.object({
-  loginRoute: z.string(),
-  selectors: authSelectorsSchema,
-  users: z.record(z.string(), z.unknown()),
-});
 
 /**
  * `routes` utilise le modèle complet défini par RFC-004 (src/schemas/route.ts).

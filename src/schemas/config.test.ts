@@ -18,7 +18,8 @@ function fullConfig(): unknown {
         password: "input[name='password']",
         submit: "button[type='submit']",
       },
-      users: {},
+      successUrl: "/dashboard",
+      users: { member: { email: "member@example.com", password: "${MEMBER_PASSWORD}" } },
     },
     routes: [],
     runs: [],
@@ -126,6 +127,28 @@ describe("configSchema", () => {
       { id: "duplicate", path: "/a", enableSnapshot: true },
       { id: "duplicate", path: "/b", enableSnapshot: true },
     ];
+
+    expect(configSchema.safeParse(config).success).toBe(false);
+  });
+
+  it("rejette 'auth' sans successUrl ni successSelector (RFC-007)", () => {
+    const config = fullConfig() as { auth: Record<string, unknown> };
+    delete config.auth["successUrl"];
+
+    expect(configSchema.safeParse(config).success).toBe(false);
+  });
+
+  it("accepte 'auth' avec seulement successSelector", () => {
+    const config = fullConfig() as { auth: Record<string, unknown> };
+    delete config.auth["successUrl"];
+    config.auth["successSelector"] = "[data-testid='dashboard']";
+
+    expect(configSchema.safeParse(config).success).toBe(true);
+  });
+
+  it("rejette un utilisateur sans email ou sans password", () => {
+    const config = fullConfig() as { auth: { users: Record<string, unknown> } };
+    config.auth.users["broken"] = { email: "broken@example.com" };
 
     expect(configSchema.safeParse(config).success).toBe(false);
   });
