@@ -37,6 +37,21 @@ export function isDynamicSegment(segment: string): boolean {
   return parseRouteSegment(segment).kind !== "static";
 }
 
+/**
+ * Vrai si un chemin complet (ex. `/docs/[...slug]`) contient un segment
+ * catch-all ou catch-all optionnel. Leur résolution (construction d'une URL
+ * concrète) n'est pas prise en charge (RFC-004/005) : ce détecteur permet à
+ * RFC-006 de ne jamais les enregistrer automatiquement dans `routes` comme
+ * s'ils ne nécessitaient aucun paramètre.
+ */
+export function hasCatchAllSegment(path: string): boolean {
+  return path
+    .split("/")
+    .some((segment) =>
+      ["catch-all", "optional-catch-all"].includes(parseRouteSegment(segment).kind),
+    );
+}
+
 /** Vrai pour un dossier de type route group App Router : `(marketing)`. */
 export function isRouteGroupSegment(segment: string): boolean {
   return /^\([^/]+\)$/.test(segment);

@@ -1,12 +1,8 @@
 import { Command } from "commander";
 import { CLI_DESCRIPTION, CLI_NAME, CLI_VERSION } from "../generated/version.js";
+import { registerScanCommand } from "./commands/scan.js";
 
-/**
- * Construit le programme CLI de SnapRun.
- *
- * À ce stade (RFC-001), aucune commande métier n'est enregistrée : le
- * programme expose uniquement l'aide et la version.
- */
+/** Construit le programme CLI de SnapRun. */
 export function createProgram(): Command {
   const program = new Command();
 
@@ -14,6 +10,8 @@ export function createProgram(): Command {
     .name(CLI_NAME)
     .description(CLI_DESCRIPTION)
     .version(CLI_VERSION, "-v, --version", "Affiche la version de SnapRun");
+
+  registerScanCommand(program);
 
   return program;
 }

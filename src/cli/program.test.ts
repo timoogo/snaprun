@@ -9,10 +9,10 @@ describe("createProgram", () => {
     expect(program.description()).toContain("SnapRun");
   });
 
-  it("n'enregistre aucune commande métier", () => {
+  it("enregistre la commande scan (RFC-006)", () => {
     const program = createProgram();
 
-    expect(program.commands).toHaveLength(0);
+    expect(program.commands.map((command) => command.name())).toContain("scan");
   });
 
   it("affiche l'aide sans erreur", () => {
