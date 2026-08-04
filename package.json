@@ -20,7 +20,7 @@
     "pretypecheck": "pnpm run generate:version",
     "prelint": "pnpm run generate:version",
     "pretest": "pnpm run generate:version",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
