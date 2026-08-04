@@ -2,6 +2,8 @@ import { Command, Option } from "commander";
 import { formatScanSummary } from "../../output/format-scan-summary.js";
 import { runScan } from "../../scan/run-scan.js";
 import { SnapRunError } from "../../errors/snaprun-error.js";
+import type { GlobalCliOptions } from "../global-cli-options.js";
+import { printCliError } from "../print-cli-error.js";
 
 interface ScanCommandOptions {
   readonly default: "enabled" | "disabled";
@@ -17,7 +19,9 @@ export function registerScanCommand(program: Command): void {
         .choices(["enabled", "disabled"])
         .default("disabled"),
     )
-    .action(async (options: ScanCommandOptions) => {
+    .action(async (options: ScanCommandOptions, command: Command) => {
+      const { debug } = command.optsWithGlobals<GlobalCliOptions>();
+
       try {
         const result = await runScan({
           cwd: process.cwd(),
@@ -27,7 +31,7 @@ export function registerScanCommand(program: Command): void {
         console.log(formatScanSummary(result));
       } catch (error) {
         if (error instanceof SnapRunError) {
-          console.error(error.message);
+          printCliError(error, debug === true);
           process.exitCode = 1;
           return;
         }

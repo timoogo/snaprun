@@ -21,4 +21,10 @@ describe("createProgram", () => {
     expect(() => program.helpInformation()).not.toThrow();
     expect(program.helpInformation()).toContain("snaprun");
   });
+
+  it("expose --debug comme option globale (RFC-010)", () => {
+    const program = createProgram();
+
+    expect(program.options.map((option) => option.long)).toContain("--debug");
+  });
 });
