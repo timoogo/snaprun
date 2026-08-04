@@ -3,6 +3,7 @@ import { chromium, type Browser } from "playwright";
 import { FormAuthAdapter } from "../auth/form-auth-adapter.js";
 import { loadConfig } from "../config/load-config.js";
 import { BaseUrlMissingError } from "../errors/base-url-missing-error.js";
+import { ensureApplicationAvailable } from "../servers/ensure-application-available.js";
 import type { ResolvedConfig } from "../types/config.js";
 import type { SnapshotReport } from "../types/snapshot.js";
 import type { SnapshotSelection } from "../types/snapshot-selection.js";
@@ -51,11 +52,19 @@ function resolveOutputDirectory(config: ResolvedConfig): string {
  * toutes passent par ce même appel à `captureSnapshots`. Ce navigateur n'est
  * jamais partagé au-delà de cet appel.
  *
+ * Avant toute capture, garantit que l'application est joignable (RFC-011,
+ * `ensureApplicationAvailable`) : réutilise `baseUrl` s'il répond déjà,
+ * sinon lance `startCommand` si `autoStart` est activé, attend sa
+ * disponibilité, puis l'arrête après la capture — jamais un serveur
+ * externe déjà en place.
+ *
  * @throws {ConfigNotFoundError} Aucun fichier de configuration trouvé.
  * @throws {ConfigInvalidError} Configuration invalide.
  * @throws {BaseUrlMissingError} `project.baseUrl` absent de la configuration.
  * @throws {RunNotFoundError} `--runName` ne correspond à aucun run.
  * @throws {RouteNotFoundError} `--route` ne correspond à aucune route (ou pas à celles du run sélectionné).
+ * @throws {ApplicationUnreachableError} `baseUrl` injoignable et `autoStart` désactivé, ou délai de démarrage dépassé.
+ * @throws {ApplicationStartFailedError} `autoStart` activé sans `startCommand`, ou la commande quitte avant d'être joignable.
  */
 export async function runSnapshots(options: RunSnapshotsOptions): Promise<SnapshotReport> {
   const config = loadConfig({
@@ -79,20 +88,32 @@ export async function runSnapshots(options: RunSnapshotsOptions): Promise<Snapsh
         })
       : undefined;
 
-  const launchBrowser = options.launchBrowser ?? ((): Promise<Browser> => chromium.launch());
-  const browser = await launchBrowser();
+  const baseUrl = config.project.baseUrl;
 
-  try {
-    return await captureSnapshots({
-      browser,
-      baseUrl: config.project.baseUrl,
-      outputDirectory,
-      fullPage: config.output.fullPage,
-      routes,
-      runs,
-      ...(auth !== undefined ? { auth } : {}),
-    });
-  } finally {
-    await browser.close();
-  }
+  return ensureApplicationAvailable(
+    {
+      baseUrl,
+      autoStart: config.project.autoStart,
+      startCommand: config.project.startCommand,
+      workingDirectory: config.project.workingDirectory,
+    },
+    async () => {
+      const launchBrowser = options.launchBrowser ?? ((): Promise<Browser> => chromium.launch());
+      const browser = await launchBrowser();
+
+      try {
+        return await captureSnapshots({
+          browser,
+          baseUrl,
+          outputDirectory,
+          fullPage: config.output.fullPage,
+          routes,
+          runs,
+          ...(auth !== undefined ? { auth } : {}),
+        });
+      } finally {
+        await browser.close();
+      }
+    },
+  );
 }
