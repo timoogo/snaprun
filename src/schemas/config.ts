@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { authSchema } from "./auth.js";
 import { routesSchema } from "./route.js";
+import { runsSchema } from "./run.js";
 
 /**
  * Seul `project` est une section obligatoire (RFC-002, correction demandée
@@ -33,14 +34,13 @@ const outputSchema = z
 
 /**
  * `routes` utilise le modèle complet défini par RFC-004 (src/schemas/route.ts).
- * La structure des éléments de `runs` est définie par RFC-008 : à ce stade,
- * seule la présence d'un tableau est validée. Les deux sections sont
- * optionnelles (défaut `[]`).
+ * `runs` utilise le modèle complet défini par RFC-008 (src/schemas/run.ts).
+ * Les deux sections sont optionnelles (défaut `[]`).
  */
 export const configSchema = z.object({
   project: projectSchema,
   output: outputSchema,
   auth: authSchema.optional(),
   routes: routesSchema.default([]),
-  runs: z.array(z.unknown()).default([]),
+  runs: runsSchema.default([]),
 });

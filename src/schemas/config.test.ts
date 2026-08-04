@@ -152,4 +152,21 @@ describe("configSchema", () => {
 
     expect(configSchema.safeParse(config).success).toBe(false);
   });
+
+  it("valide 'runs' selon le modèle de run de la RFC-008", () => {
+    const config = fullConfig() as { runs: unknown[] };
+    config.runs = [{ runName: "member", user: "member", order: 1, routes: ["member-calendar"] }];
+
+    expect(configSchema.safeParse(config).success).toBe(true);
+  });
+
+  it("rejette 'runs' contenant un 'runName' dupliqué", () => {
+    const config = fullConfig() as { runs: unknown[] };
+    config.runs = [
+      { runName: "duplicate", order: 1, routes: [] },
+      { runName: "duplicate", order: 2, routes: [] },
+    ];
+
+    expect(configSchema.safeParse(config).success).toBe(false);
+  });
 });
