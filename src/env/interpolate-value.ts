@@ -8,11 +8,11 @@ export interface InterpolateContext {
 }
 
 /**
- * Remplace chaque `${VARIABLE}` d'une chaîne par sa valeur résolue.
- * Supporte plusieurs interpolations par chaîne. N'exécute jamais de code :
- * substitution de texte pure, aucun `eval`.
+ * Replace every `${VARIABLE}` placeholder in a string with its resolved
+ * value. Supports multiple interpolations per string. Never executes code:
+ * pure text substitution, no `eval`.
  *
- * @throws {EnvVariableMissingError} Si une variable référencée est introuvable.
+ * @throws {EnvVariableMissingError} If a referenced variable cannot be found.
  */
 export function interpolateValue(rawValue: string, context: InterpolateContext): string {
   return rawValue.replace(PLACEHOLDER_PATTERN, (_match, variableName: string) =>

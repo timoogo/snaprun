@@ -10,17 +10,17 @@ export interface CaptureRouteOptions {
   readonly page: Page;
   readonly baseUrl: string;
   readonly route: RawRoute;
-  /** Chemin de fichier PNG cible, déjà calculé (RFC-009). */
+  /** Target PNG file path, already computed (RFC-009). */
   readonly filePath: string;
   readonly fullPage: boolean;
   readonly timeoutMs?: number;
 }
 
 /**
- * Capture une route unique (RFC-009) : résout son URL (statique, dynamique ou
- * `snapshotPath`, RFC-004), navigue, attend la stabilité du réseau
- * (`networkidle`) puis écrit un PNG au chemin donné. Crée les dossiers
- * intermédiaires si nécessaire.
+ * Capture a single route (RFC-009): resolve its URL (static, dynamic, or
+ * `snapshotPath`, RFC-004), navigate to it, wait for network stability
+ * (`networkidle`), then write a PNG to the target path. Create parent
+ * directories when needed.
  */
 export async function captureRoute(options: CaptureRouteOptions): Promise<void> {
   const { page, baseUrl, route, filePath, fullPage } = options;

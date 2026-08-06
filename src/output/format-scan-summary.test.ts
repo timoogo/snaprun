@@ -16,12 +16,12 @@ describe("formatScanSummary", () => {
     const output = formatScanSummary(result);
 
     expect(output).toContain("/project/snaprun.config.json");
-    expect(output).toContain("Ajoutées (1)");
+    expect(output).toContain("Added (1)");
     expect(output).toContain("/blog (blog)");
-    expect(output).toContain("Inchangées (1)");
-    expect(output).toContain("Potentiellement obsolètes (1)");
+    expect(output).toContain("Unchanged (1)");
+    expect(output).toContain("Potentially obsolete (1)");
     expect(output).toContain("/gone (gone)");
-    expect(output).toContain("Fichier de configuration modifié.");
+    expect(output).toContain("Configuration file updated.");
   });
 
   it("indique que le fichier est inchangé si fileModified est faux", () => {
@@ -34,7 +34,7 @@ describe("formatScanSummary", () => {
       fileModified: false,
     };
 
-    expect(formatScanSummary(result)).toContain("Fichier inchangé.");
+    expect(formatScanSummary(result)).toContain("Configuration file unchanged.");
   });
 
   it("signale une route dynamique ajoutée comme nécessitant une configuration manuelle", () => {
@@ -56,7 +56,7 @@ describe("formatScanSummary", () => {
     };
 
     expect(formatScanSummary(result)).toContain(
-      "configuration manuelle des paramètres requise avant activation",
+      "manual parameter setup is required before this route can be enabled",
     );
   });
 
@@ -79,8 +79,8 @@ describe("formatScanSummary", () => {
 
     const output = formatScanSummary(result);
 
-    expect(output).toContain("Routes dynamiques non prises en charge (catch-all) (1)");
+    expect(output).toContain("Unsupported catch-all routes (1)");
     expect(output).toContain("/docs/[...slug]");
-    expect(output).toContain("non ajoutée");
+    expect(output).toContain("was not added");
   });
 });

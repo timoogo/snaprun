@@ -3,6 +3,6 @@ import { createProgram } from "./cli/program.js";
 
 const program = createProgram();
 
-// Sans argument, `snaprun` exécute désormais l'action par défaut (RFC-010) :
-// capture tous les runs. L'aide reste disponible via `--help`/`-h`.
+// Without arguments, `snaprun` now executes the default action (RFC-010):
+// capture every run. Help remains available through `--help`/`-h`.
 program.parse(process.argv);

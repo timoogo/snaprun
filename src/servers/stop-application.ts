@@ -4,20 +4,18 @@ const GRACE_PERIOD_MS = 3_000;
 const POLL_INTERVAL_MS = 20;
 
 /**
- * Arrête une application lancée par SnapRun (RFC-011), jamais un serveur
- * externe (cette fonction n'est appelée que sur un `RunningApplication`
- * effectivement créé par {@link spawnApplication}). `SIGTERM` d'abord (arrêt
- * propre), `SIGKILL` après un court délai de grâce si le processus ne s'est
- * pas arrêté. Cible le groupe de processus (`-pid`) sur POSIX pour éviter
- * tout processus orphelin issu d'une commande shell (ex. un gestionnaire de
- * paquets démarrant lui-même le vrai serveur).
+ * Stop an application launched by SnapRun (RFC-011), never an external
+ * server. This function is only called on a `RunningApplication` actually
+ * created by {@link spawnApplication}. Send `SIGTERM` first for graceful
+ * shutdown, then `SIGKILL` after a short grace period if the process is
+ * still running. On POSIX, target the process group (`-pid`) to avoid
+ * orphaned processes created by shell commands.
  *
- * Sur POSIX, l'attente porte sur le groupe entier (`kill(-pid, 0)`), pas
- * seulement sur la sortie du processus directement suivi : un enfant
- * indirect, membre du même groupe, peut recevoir et traiter le même signal
- * quelques millisecondes après le processus principal — attendre
- * uniquement ce dernier laisserait une fenêtre où un tel enfant est encore
- * considéré comme arrêté alors qu'il termine juste sa fermeture.
+ * On POSIX, waiting covers the whole group (`kill(-pid, 0)`), not only the
+ * directly tracked process. An indirect child in the same group may receive
+ * and process the signal a few milliseconds after the main process, and
+ * waiting only for that main process would leave a window where the child is
+ * still shutting down.
  */
 export async function stopApplication(app: RunningApplication): Promise<void> {
   if (app.hasExited() || app.pid === undefined) {
@@ -70,10 +68,10 @@ function sendSignal(pid: number, signal: NodeJS.Signals): void {
     if (process.platform === "win32") {
       process.kill(pid, signal);
     } else {
-      // Groupe de processus (detached: true à la création, RFC-011).
+      // Process group (`detached: true` at creation time, RFC-011).
       process.kill(-pid, signal);
     }
   } catch {
-    // Déjà arrêté entre-temps : rien à faire.
+    // Already stopped in the meantime: nothing to do.
   }
 }

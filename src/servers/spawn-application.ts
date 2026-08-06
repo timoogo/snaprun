@@ -1,27 +1,25 @@
 import { spawn } from "node:child_process";
 
-/** Application lancée par SnapRun (RFC-011), avec son état de sortie et sa sortie capturée. */
+/** Application launched by SnapRun (RFC-011), with exit state and captured output. */
 export interface RunningApplication {
   readonly pid: number | undefined;
   hasExited(): boolean;
   exitCode(): number | null;
-  /** stdout + stderr concaténés, pour diagnostiquer un échec de démarrage. */
+  /** Concatenated stdout + stderr, used to diagnose startup failures. */
   capturedOutput(): string;
 }
 
 /**
- * Lance `startCommand` depuis `workingDirectory` (RFC-011). `detached: true`
- * sur POSIX place le processus dans son propre groupe, pour que
- * {@link stopApplication} puisse arrêter la commande et ses éventuels
- * enfants sans laisser de processus orphelin. Préfixée par le mot-clé shell
- * `exec` sur POSIX : sans lui, `sh -c "<commande>"` garde un shell
- * intermédiaire qui place fréquemment sa propre commande dans un *nouveau*
- * groupe de processus (contrôle de job), rendant ce groupe injoignable par
- * `stopApplication` (bug constaté : le shell s'arrête, pas la commande
- * qu'il a lancée) ; `exec` fait remplacer le shell par la commande elle-même
- * (un seul processus, dans le groupe créé par `detached`). stdout/stderr
- * sont capturés, jamais affichés directement (évite le bruit tant que
- * l'application démarre normalement).
+ * Launch `startCommand` from `workingDirectory` (RFC-011). On POSIX,
+ * `detached: true` puts the process in its own group so
+ * {@link stopApplication} can stop the command and any child processes
+ * without leaving orphans. On POSIX the command is prefixed with the shell
+ * keyword `exec`: without it, `sh -c "<command>"` keeps an intermediate shell
+ * that often moves its own command into a new process group (job control),
+ * making that group unreachable to `stopApplication` (observed bug: the
+ * shell stops, not the command it launched). `exec` replaces the shell with
+ * the command itself. stdout/stderr are captured and never printed directly,
+ * which avoids noise while the application starts normally.
  */
 export function spawnApplication(
   startCommand: string,

@@ -7,10 +7,10 @@ const authSelectorsSchema = z.object({
 });
 
 /**
- * `email`/`password` peuvent contenir des valeurs littérales ou des
- * `${VARIABLE}` résolus par `resolveEnvValue` (RFC-003) au moment de la
- * connexion — jamais au chargement de la configuration, pour ne jamais
- * logger un secret par accident lors d'une validation.
+ * `email` and `password` may contain literal values or `${VARIABLE}`
+ * placeholders resolved by `resolveEnvValue` (RFC-003) at login time, never
+ * while loading the configuration, so validation never logs a secret by
+ * accident.
  */
 const userCredentialsSchema = z.object({
   email: z.string(),
@@ -18,12 +18,11 @@ const userCredentialsSchema = z.object({
 });
 
 /**
- * Section optionnelle de la configuration (RFC-002 : une configuration sans
- * authentification est valide). Quand elle est présente, sa structure reste
- * requise dans son intégralité. La stratégie de succès de connexion
- * (`successUrl` et/ou `successSelector`) doit définir au moins un critère
- * (RFC-007) : au moins l'un des deux doit permettre de déterminer qu'une
- * connexion a réussi.
+ * Optional configuration section (RFC-002: configuration without
+ * authentication is valid). When present, its full structure is required.
+ * The login success strategy (`successUrl` and/or `successSelector`) must
+ * define at least one success criterion (RFC-007): at least one of them must
+ * allow SnapRun to determine that login succeeded.
  */
 export const authSchema = z
   .object({
@@ -38,7 +37,7 @@ export const authSchema = z
       ctx.addIssue({
         code: "custom",
         message:
-          "auth.successUrl ou auth.successSelector doit être défini (stratégie de succès de connexion requise).",
+          "auth.successUrl or auth.successSelector must be defined so SnapRun can detect a successful login.",
         path: ["successUrl"],
       });
     }

@@ -5,7 +5,7 @@ export class RunNotFoundError extends SnapRunError {
   readonly runName: string;
 
   constructor(runName: string) {
-    super(`Run introuvable : ${runName}`);
+    super(`Run not found: ${runName}`);
     this.runName = runName;
   }
 }

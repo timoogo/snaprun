@@ -1,10 +1,10 @@
 /**
- * Base commune des erreurs applicatives de SnapRun.
+ * Common base class for SnapRun application errors.
  *
- * Le message reste volontairement lisible sans détail technique brut ; la
- * cause d'origine (erreur de parsing, erreurs Zod, etc.) est portée par la
- * propriété standard `cause` et n'est destinée à être affichée qu'en mode
- * `--debug` (introduit par une RFC ultérieure).
+ * The message intentionally stays readable without raw technical details.
+ * The original cause (parse errors, Zod errors, and so on) is stored in the
+ * standard `cause` property and is meant to be displayed only in `--debug`
+ * mode.
  */
 export abstract class SnapRunError extends Error {
   abstract readonly code: string;

@@ -8,68 +8,70 @@ import type { ResolvedConfig } from "../types/config.js";
 import type { SnapshotReport } from "../types/snapshot.js";
 import type { SnapshotSelection } from "../types/snapshot-selection.js";
 import { captureSnapshots } from "./capture-snapshots.js";
+import { createRunId } from "./create-run-id.js";
 import { resolveSnapshotScope } from "./resolve-snapshot-scope.js";
 
 export interface RunSnapshotsOptions {
   readonly cwd: string;
   readonly explicitConfigPath?: string | undefined;
   readonly selection: SnapshotSelection;
+  readonly onWarning?: ((message: string) => void) | undefined;
   /**
-   * Fabrique du navigateur, injectable pour les tests (démontrer la
-   * fermeture systématique sans lancer un vrai Chromium à chaque scénario
-   * rapide) ; par défaut `() => chromium.launch()` (RFC-010).
+   * Browser factory, injectable for tests (to prove browser shutdown without
+   * launching a real Chromium for every fast scenario). Defaults to
+   * `() => chromium.launch()` (RFC-010).
    */
   readonly launchBrowser?: (() => Promise<Browser>) | undefined;
+  readonly now?: (() => Date) | undefined;
 }
 
 /**
- * Résout `output.directory` (chemin relatif dans la configuration) en
- * chemin absolu (RFC-010). Règle exacte, volontairement distincte de
- * `resolveConfigPaths` (RFC-002/003, jamais modifié) : résolu par rapport à
- * `project.root` — donc, transitivement, par rapport au répertoire du
- * fichier de configuration uniquement quand `project.root` vaut `.`
- * (défaut) ; si `project.root` pointe ailleurs (ex. `"./app"`), la sortie
- * suit `project.root`, pas le répertoire du fichier de configuration ni le
- * `cwd` du process.
+ * Resolve `output.directory` (a relative configuration path) to an absolute
+ * path (RFC-010). This rule is intentionally distinct from
+ * `resolveConfigPaths` (RFC-002/003, left unchanged): it resolves relative to
+ * `project.root`, which means transitively relative to the configuration file
+ * directory only when `project.root` is `.` (the default). If
+ * `project.root` points elsewhere (for example `"./app"`), output follows
+ * `project.root`, not the configuration file directory or the process `cwd`.
  */
 function resolveOutputDirectory(config: ResolvedConfig): string {
   return resolve(config.project.root, config.output.directory);
 }
 
 /**
- * Exécute `snaprun` (RFC-010) : charge la configuration, réduit
- * `routes`/`runs` à la portée demandée (RFC-010), puis délègue à
- * `captureSnapshots` (RFC-009).
+ * Execute `snaprun` (RFC-010): load configuration, reduce `routes`/`runs` to
+ * the requested scope (RFC-010), then delegate to `captureSnapshots`
+ * (RFC-009).
  *
- * Propriétaire unique du `Browser` : cette fonction est le seul endroit du
- * programme qui appelle `chromium.launch()` (par défaut) ou la fabrique
- * injectée, et le seul qui appelle `browser.close()`. La fermeture est
- * inconditionnelle et couvre toute la durée de vie du navigateur via un
- * `try`/`finally` : elle s'exécute après un succès, après une capture en
- * échec (rapport `succeeded: false`), après un échec d'authentification, et
- * après toute exception inattendue survenant une fois le navigateur lancé —
- * quelle que soit la sélection (`all`, `--runName`, `--route`), puisque
- * toutes passent par ce même appel à `captureSnapshots`. Ce navigateur n'est
- * jamais partagé au-delà de cet appel.
+ * Sole owner of the `Browser`: this function is the only place in the
+ * program that calls `chromium.launch()` (by default) or the injected
+ * factory, and the only place that calls `browser.close()`. Closure is
+ * unconditional across the full browser lifecycle through `try`/`finally`:
+ * it runs after success, after a failed capture (`succeeded: false`), after
+ * an authentication failure, and after any unexpected exception once the
+ * browser has been launched. That is true for every selection
+ * (`all`, `--runName`, `--route`) because all of them pass through the same
+ * `captureSnapshots` call. The browser is never shared beyond this call.
  *
- * Avant toute capture, garantit que l'application est joignable (RFC-011,
- * `ensureApplicationAvailable`) : réutilise `baseUrl` s'il répond déjà,
- * sinon lance `startCommand` si `autoStart` est activé, attend sa
- * disponibilité, puis l'arrête après la capture — jamais un serveur
- * externe déjà en place.
+ * Before any capture, ensure the application is reachable (RFC-011,
+ * `ensureApplicationAvailable`): reuse `baseUrl` when it already responds,
+ * otherwise launch `startCommand` if `autoStart` is enabled, wait for
+ * readiness, then stop it after capture. An already running external server
+ * is never stopped.
  *
- * @throws {ConfigNotFoundError} Aucun fichier de configuration trouvé.
- * @throws {ConfigInvalidError} Configuration invalide.
- * @throws {BaseUrlMissingError} `project.baseUrl` absent de la configuration.
- * @throws {RunNotFoundError} `--runName` ne correspond à aucun run.
- * @throws {RouteNotFoundError} `--route` ne correspond à aucune route (ou pas à celles du run sélectionné).
- * @throws {ApplicationUnreachableError} `baseUrl` injoignable et `autoStart` désactivé, ou délai de démarrage dépassé.
- * @throws {ApplicationStartFailedError} `autoStart` activé sans `startCommand`, ou la commande quitte avant d'être joignable.
+ * @throws {ConfigNotFoundError} No configuration file was found.
+ * @throws {ConfigInvalidError} Configuration is invalid.
+ * @throws {BaseUrlMissingError} `project.baseUrl` is missing from configuration.
+ * @throws {RunNotFoundError} `--runName` does not match any run.
+ * @throws {RouteNotFoundError} `--route` does not match any route, or not one from the selected run.
+ * @throws {ApplicationUnreachableError} `baseUrl` is unreachable and `autoStart` is disabled, or startup timed out.
+ * @throws {ApplicationStartFailedError} `autoStart` is enabled without `startCommand`, or the command exits before becoming reachable.
  */
 export async function runSnapshots(options: RunSnapshotsOptions): Promise<SnapshotReport> {
   const config = loadConfig({
     cwd: options.cwd,
     explicitPath: options.explicitConfigPath,
+    onWarning: options.onWarning,
   });
 
   if (config.project.baseUrl === undefined) {
@@ -78,6 +80,10 @@ export async function runSnapshots(options: RunSnapshotsOptions): Promise<Snapsh
 
   const { routes, runs } = resolveSnapshotScope(config.routes, config.runs, options.selection);
   const outputDirectory = resolveOutputDirectory(config);
+  const runId =
+    config.output.structure === "run"
+      ? createRunId((options.now ?? ((): Date => new Date()))())
+      : undefined;
 
   const auth =
     config.auth !== undefined
@@ -106,6 +112,8 @@ export async function runSnapshots(options: RunSnapshotsOptions): Promise<Snapsh
           browser,
           baseUrl,
           outputDirectory,
+          outputStructure: config.output.structure,
+          ...(runId !== undefined ? { runId } : {}),
           fullPage: config.output.fullPage,
           routes,
           runs,

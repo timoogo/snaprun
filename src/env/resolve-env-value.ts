@@ -2,19 +2,19 @@ import { interpolateValue } from "./interpolate-value.js";
 import { loadFileEnv } from "./load-file-env.js";
 
 export interface ResolveEnvValueOptions {
-  /** Répertoire depuis lequel `.env.local`/`.env` sont recherchés (RFC-003). */
+  /** Directory from which `.env.local` and `.env` are resolved (RFC-003). */
   readonly workingDirectory: string;
-  /** Injectable pour les tests ; par défaut `process.env`. */
+  /** Injectable for tests; defaults to `process.env`. */
   readonly processEnv?: NodeJS.ProcessEnv;
 }
 
 /**
- * Résout une valeur de configuration : une valeur littérale (sans `${...}`)
- * est retournée telle quelle, sans jamais lire l'environnement ni le disque
- * (priorité 1 de la RFC-003). Sinon, chaque `${VARIABLE}` est résolue via
- * `process.env`, puis `.env.local`, puis `.env`.
+ * Resolve a configuration value: a literal value (without `${...}`) is
+ * returned as-is without reading the environment or disk
+ * (priority 1 from RFC-003). Otherwise, each `${VARIABLE}` is resolved from
+ * `process.env`, then `.env.local`, then `.env`.
  *
- * @throws {EnvVariableMissingError} Si une variable référencée est introuvable.
+ * @throws {EnvVariableMissingError} If a referenced variable cannot be found.
  */
 export function resolveEnvValue(rawValue: string, options: ResolveEnvValueOptions): string {
   if (!rawValue.includes("${")) {

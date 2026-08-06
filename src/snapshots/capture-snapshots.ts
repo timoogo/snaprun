@@ -17,39 +17,41 @@ import { selectStandaloneRoutes } from "./select-standalone-routes.js";
 
 export interface CaptureSnapshotsOptions {
   /**
-   * Fourni par l'appelant, jamais créé ni fermé ici (RFC-009) : ce module ne
-   * possède que le cycle de vie des `BrowserContext`, pas celui du
-   * `Browser`.
+   * Provided by the caller and never created or closed here (RFC-009): this
+   * module owns only `BrowserContext` lifecycle, not `Browser` lifecycle.
    */
   readonly browser: Browser;
   readonly baseUrl: string;
-  /** Répertoire de sortie, déjà résolu en chemin absolu (config `output.directory`). */
+  /** Output directory, already resolved to an absolute path (`output.directory`). */
   readonly outputDirectory: string;
+  readonly outputStructure?: "flat" | "run" | "scope";
+  readonly runId?: string | undefined;
   readonly fullPage: boolean;
   readonly routes: readonly RawRoute[];
   readonly runs: readonly RawRun[];
   /**
-   * Fournie par l'appelant (RFC-007) : requise uniquement si une route
-   * résolue par le plan porte un utilisateur. `undefined` si aucune route
-   * de la configuration ne nécessite d'authentification.
+   * Provided by the caller (RFC-007): required only when a route resolved by
+   * the plan has a user. `undefined` when no route in the configuration
+   * requires authentication.
    */
   readonly auth?: AuthAdapter | undefined;
   readonly timeoutMs?: number;
 }
 
 /**
- * Exécute les captures Playwright (RFC-009) à partir du plan d'exécution
- * typé (RFC-008) : un `BrowserContext` isolé par run, authentification
- * paresseuse par route via l'`AuthAdapter` fourni, puis les routes
- * `enableSnapshot: true` non référencées par un run (« standalone »),
- * chacune dans son propre contexte isolé.
+ * Execute Playwright captures (RFC-009) from the typed execution plan
+ * (RFC-008): one isolated `BrowserContext` per run, lazy per-route
+ * authentication through the provided `AuthAdapter`, then
+ * `enableSnapshot: true` routes that are not referenced by a run
+ * ("standalone"), each in its own isolated context.
  *
- * Fail-fast : la première capture en échec interrompt l'exécution. Le
- * rapport renvoyé décrit dans tous les cas les captures effectivement
- * réussies avant l'arrêt, ainsi que le détail de l'échec le cas échéant.
+ * Fail-fast: the first failed capture interrupts execution. The returned
+ * report always describes the captures that actually succeeded before the
+ * stop, plus failure details when relevant.
  */
 export async function captureSnapshots(options: CaptureSnapshotsOptions): Promise<SnapshotReport> {
   const startedAt = Date.now();
+  const outputStructure = options.outputStructure ?? "flat";
   const plan = buildExecutionPlan(options.runs, options.routes);
   const standaloneRoutes = selectStandaloneRoutes(options.routes, options.runs);
 
@@ -71,8 +73,11 @@ export async function captureSnapshots(options: CaptureSnapshotsOptions): Promis
   if (failure === undefined) {
     for (const route of standaloneRoutes) {
       const filePath = computeSnapshotFilePath(options.outputDirectory, {
+        structure: outputStructure,
         kind: "standalone",
         routeId: route.id,
+        scope: route.scope,
+        runId: options.runId,
       });
 
       const outcome = await withIsolatedContext(options.browser, (context) =>
@@ -107,6 +112,7 @@ async function captureRun(
   options: CaptureSnapshotsOptions,
 ): Promise<RunCaptureResult> {
   return withIsolatedContext(options.browser, async (context) => {
+    const outputStructure = options.outputStructure ?? "flat";
     const snapshots: CapturedSnapshot[] = [];
     let index = 0;
 
@@ -117,10 +123,13 @@ async function captureRun(
 
       index += 1;
       const filePath = computeSnapshotFilePath(options.outputDirectory, {
+        structure: outputStructure,
         kind: "run",
         runName: plannedRun.runName,
         index,
         routeId: plannedRoute.route.id,
+        scope: plannedRoute.route.scope,
+        runId: options.runId,
       });
 
       const outcome = await capturePlannedRoute(
@@ -143,13 +152,11 @@ async function captureRun(
 }
 
 /**
- * Unique point de création/fermeture des `BrowserContext` (RFC-009,
- * correction post-revue) : un run et une route standalone en créent chacun
- * un, isolé, en passant systématiquement par cette fonction. `context.close()`
- * s'exécute toujours dans le `finally`, y compris si `work` échoue — aucun
- * `BrowserContext` ne peut rester ouvert après un appel, quelle que soit la
- * cause de l'échec (navigation, capture, authentification, ou toute autre
- * exception).
+ * Single creation/closure point for `BrowserContext` instances (RFC-009,
+ * review follow-up): every run and every standalone route creates its own
+ * isolated context through this function. `context.close()` always runs in
+ * the `finally` block, even when `work` fails, so no `BrowserContext` can
+ * remain open after a call regardless of the failure cause.
  */
 async function withIsolatedContext<T>(
   browser: Browser,
@@ -174,7 +181,7 @@ interface PlannedRouteCaptureFailure {
   readonly failure: SnapshotFailure;
 }
 
-/** Authentifie si nécessaire, puis capture une route sur une page dédiée du contexte donné. */
+/** Authenticate if needed, then capture a route on a dedicated page in the given context. */
 async function capturePlannedRoute(
   context: BrowserContext,
   plannedRoute: Pick<PlannedRoute, "route" | "user">,
@@ -190,7 +197,7 @@ async function capturePlannedRoute(
       if (options.auth === undefined) {
         throw new SnapshotFailedError(route.id, {
           cause: new Error(
-            `Aucun adaptateur d'authentification fourni pour l'utilisateur : ${user}`,
+            `No authentication adapter was provided for user: ${user}`,
           ),
         });
       }
@@ -230,7 +237,7 @@ async function capturePlannedRoute(
   }
 }
 
-/** Le rapport conserve la raison concrète de l'échec (`cause`), pas le message générique de {@link SnapshotFailedError}. */
+/** Keep the concrete failure reason (`cause`) in reports, not the generic {@link SnapshotFailedError} message. */
 function toFailureMessage(error: unknown): string {
   if (error instanceof SnapshotFailedError) {
     return error.cause instanceof Error ? error.cause.message : String(error.cause);

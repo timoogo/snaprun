@@ -3,10 +3,11 @@ import { FilesystemRouteScanner } from "./filesystem-route-scanner.js";
 import type { RouteScanner } from "./scanner.js";
 
 /**
- * Façade stable utilisée par le reste de SnapRun (RFC-005). Délègue à un
- * moteur interne — `FilesystemRouteScanner` aujourd'hui. Remplacer le moteur
- * (ex. un futur `NextListRouteScanner` ou `NextManifestRouteScanner`) se fait
- * ici, sans changer les appelants de `NextjsRouteScanner`.
+ * Stable facade used by the rest of SnapRun (RFC-005). Delegates to an
+ * internal engine, currently `FilesystemRouteScanner`. Replacing the engine
+ * (for example with a future `NextListRouteScanner` or
+ * `NextManifestRouteScanner`) happens here without changing callers of
+ * `NextjsRouteScanner`.
  */
 export class NextjsRouteScanner implements RouteScanner {
   private readonly engine: RouteScanner;

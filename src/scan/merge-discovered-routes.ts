@@ -6,29 +6,29 @@ import { createRouteFromDiscovery } from "./create-route-from-discovery.js";
 export interface MergeDiscoveredRoutesResult {
   readonly added: readonly RawRoute[];
   readonly unchanged: readonly RawRoute[];
-  /** Routes existantes non retrouvées par le scan : signalées, jamais retirées d'elles-mêmes. */
+  /** Existing routes not found by the scan: reported, never removed automatically. */
   readonly obsolete: readonly RawRoute[];
   /**
-   * Routes catch-all (`[...slug]`) ou catch-all optionnelles (`[[...slug]]`)
-   * découvertes sans correspondance existante : jamais ajoutées
-   * automatiquement à `routes` (RFC-004/005 ne savent pas construire leur
-   * URL concrète), seulement signalées comme non prises en charge.
+   * Catch-all (`[...slug]`) or optional catch-all (`[[...slug]]`) routes
+   * discovered without an existing match: never added automatically to
+   * `routes` because RFC-004/005 cannot build a concrete URL for them yet.
+   * They are only reported as unsupported.
    */
   readonly unsupportedCatchAll: readonly DiscoveredRoute[];
-  /** `existingRoutes` inchangé dans son ordre, `added` toujours ajouté à la fin (RFC-006). */
+  /** `existingRoutes` keeps its order, and `added` is always appended (RFC-006). */
   readonly mergedRoutes: readonly RawRoute[];
 }
 
 /**
- * Fusionne les routes découvertes avec les routes existantes de la
- * configuration (RFC-006). Correspondance par `path` :
- * - une route existante retrouvée reste inchangée (id, enableSnapshot, user,
- *   parameters, snapshotPath, ordre) — y compris une route catch-all déjà
- *   configurée manuellement par l'utilisateur ;
- * - une route découverte sans correspondance existante est ajoutée, sauf si
- *   elle contient un segment catch-all (voir `unsupportedCatchAll`) ;
- * - une route existante non retrouvée est signalée « obsolète », jamais
- *   supprimée automatiquement.
+ * Merge discovered routes with existing configured routes (RFC-006). Routes
+ * are matched by `path`:
+ * - an existing route that is rediscovered stays unchanged (id,
+ *   enableSnapshot, user, parameters, snapshotPath, order), including a
+ *   catch-all route that was already configured manually;
+ * - a discovered route with no existing match is added, unless it contains a
+ *   catch-all segment (see `unsupportedCatchAll`);
+ * - an existing route that is not rediscovered is reported as obsolete and
+ *   is never removed automatically.
  */
 export function mergeDiscoveredRoutes(
   existingRoutes: readonly RawRoute[],

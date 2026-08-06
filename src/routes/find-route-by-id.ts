@@ -1,7 +1,7 @@
 import { RouteNotFoundError } from "../errors/route-not-found-error.js";
 import type { RawRoute } from "../types/route.js";
 
-/** @throws {RouteNotFoundError} Aucune route ne porte cet identifiant. */
+/** @throws {RouteNotFoundError} No route uses this identifier. */
 export function findRouteById(routes: readonly RawRoute[], id: string): RawRoute {
   const route = routes.find((candidate) => candidate.id === id);
 

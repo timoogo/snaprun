@@ -1,34 +1,32 @@
 import { routeHasPlaceholderParameters } from "../scan/route-has-placeholder-parameters.js";
 import type { ScanResult } from "../types/scan-result.js";
 
-/** Formate le résultat de `snaprun scan` pour la sortie console (RFC-006). */
+/** Format the `snaprun scan` result for console output (RFC-006). */
 export function formatScanSummary(result: ScanResult): string {
-  const lines: string[] = [`Configuration : ${result.configFilePath}`, ""];
+  const lines: string[] = [`Using configuration: ${result.configFilePath}`, ""];
 
-  lines.push(`Ajoutées (${result.added.length})`);
+  lines.push(`Added (${result.added.length})`);
   for (const route of result.added) {
     const placeholderNotice = routeHasPlaceholderParameters(route)
-      ? " — configuration manuelle des paramètres requise avant activation"
+      ? " - manual parameter setup is required before this route can be enabled"
       : "";
     lines.push(`  + ${route.path} (${route.id})${placeholderNotice}`);
   }
 
-  lines.push(`Inchangées (${result.unchanged.length})`);
+  lines.push(`Unchanged (${result.unchanged.length})`);
 
-  lines.push(`Potentiellement obsolètes (${result.obsolete.length})`);
+  lines.push(`Potentially obsolete (${result.obsolete.length})`);
   for (const route of result.obsolete) {
     lines.push(`  ? ${route.path} (${route.id})`);
   }
 
-  lines.push(
-    `Routes dynamiques non prises en charge (catch-all) (${result.unsupportedCatchAll.length})`,
-  );
+  lines.push(`Unsupported catch-all routes (${result.unsupportedCatchAll.length})`);
   for (const route of result.unsupportedCatchAll) {
-    lines.push(`  ! ${route.path} — non configurable automatiquement, non ajoutée`);
+    lines.push(`  ! ${route.path} - cannot be configured automatically and was not added`);
   }
 
   lines.push("");
-  lines.push(result.fileModified ? "Fichier de configuration modifié." : "Fichier inchangé.");
+  lines.push(result.fileModified ? "Configuration file updated." : "Configuration file unchanged.");
 
   return lines.join("\n");
 }

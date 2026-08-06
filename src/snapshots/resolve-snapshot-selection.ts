@@ -9,26 +9,26 @@ export interface SnapshotCliOptions {
 }
 
 /**
- * Traduit les options CLI de la commande par défaut (RFC-010) en une
- * {@link SnapshotSelection} typée. Valide les combinaisons interdites
- * explicitement, avant tout accès à la configuration ou au navigateur.
+ * Translate default-command CLI options (RFC-010) into a typed
+ * {@link SnapshotSelection}. Explicitly validate forbidden combinations
+ * before touching configuration or the browser.
  *
- * @throws {CliOptionConflictError} Combinaison d'options incompatibles.
+ * @throws {CliOptionConflictError} Incompatible option combination.
  */
 export function resolveSnapshotSelection(options: SnapshotCliOptions): SnapshotSelection {
   const { runName, partial, route, user } = options;
 
   if (partial === true && runName === undefined) {
-    throw new CliOptionConflictError("--partial nécessite --runName.");
+    throw new CliOptionConflictError("--partial requires --runName.");
   }
 
   if (user !== undefined && route === undefined) {
-    throw new CliOptionConflictError("--user nécessite --route.");
+    throw new CliOptionConflictError("--user requires --route.");
   }
 
   if (user !== undefined && runName !== undefined) {
     throw new CliOptionConflictError(
-      "--user ne peut pas être combiné à --runName : configurez le user du run dans la configuration.",
+      "--user cannot be combined with --runName. Configure the run user in the SnapRun configuration instead.",
     );
   }
 

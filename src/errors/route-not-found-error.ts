@@ -5,7 +5,7 @@ export class RouteNotFoundError extends SnapRunError {
   readonly routeId: string;
 
   constructor(routeId: string) {
-    super(`Route introuvable : ${routeId}`);
+    super(`Route not found: ${routeId}`);
     this.routeId = routeId;
   }
 }

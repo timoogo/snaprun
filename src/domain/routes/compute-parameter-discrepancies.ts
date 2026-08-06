@@ -1,17 +1,18 @@
 import { extractPathParameterNames } from "./extract-path-parameter-names.js";
 
 export interface ParameterDiscrepancies {
-  /** Noms référencés dans `path` mais absents de `parameters`. */
+  /** Names referenced in `path` but missing from `parameters`. */
   readonly missing: readonly string[];
-  /** Clés de `parameters` non référencées dans `path`. */
+  /** Keys from `parameters` that are not referenced in `path`. */
   readonly unknown: readonly string[];
 }
 
 /**
- * Compare les paramètres déclarés dans `path` (segments `[name]`) à ceux
- * fournis dans `parameters`. Logique unique partagée par la validation Zod
- * (`src/schemas/route.ts`) et la résolution de chemin (RFC-004) : la
- * cohérence structurelle est la même que `snapshotPath` soit fourni ou non.
+ * Compare the parameters declared in `path` (`[name]` segments) with the
+ * ones provided in `parameters`. This shared logic is used by both Zod
+ * validation (`src/schemas/route.ts`) and path resolution (RFC-004): the
+ * structural consistency rules are identical whether `snapshotPath` is
+ * provided or not.
  */
 export function computeParameterDiscrepancies(
   path: string,

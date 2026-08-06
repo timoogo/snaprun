@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -120,6 +120,19 @@ describe("loadConfig", () => {
     expect(result.project.root).toBe(join(dir, "custom-root"));
   });
 
+  it("remembers a valid explicit config path after loading it successfully", () => {
+    mkdirSync(join(dir, "config"), { recursive: true });
+    writeFileSync(join(dir, "config", "snaprun.json"), JSON.stringify(validConfig()));
+
+    loadConfig({ cwd: dir, explicitPath: "./config/snaprun.json" });
+
+    const metadata = JSON.parse(readFileSync(join(dir, ".snaprun", "project.json"), "utf-8")) as {
+      configPath: string;
+    };
+
+    expect(metadata.configPath).toBe("./config/snaprun.json");
+  });
+
   it("lève CONFIG_NOT_FOUND si aucun fichier de configuration n'existe", () => {
     expect(() => loadConfig({ cwd: dir })).toThrow(ConfigNotFoundError);
   });
@@ -161,7 +174,7 @@ describe("loadConfig", () => {
     expect(result.project.autoStart).toBe(false);
     expect(result.project.baseUrl).toBeUndefined();
     expect(result.project.startCommand).toBeUndefined();
-    expect(result.output).toEqual({ directory: "./snapshots", fullPage: true });
+    expect(result.output).toEqual({ directory: "./snapshots", fullPage: true, structure: "flat" });
     expect(result.routes).toEqual([]);
     expect(result.runs).toEqual([]);
     expect(result.auth).toBeUndefined();

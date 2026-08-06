@@ -12,16 +12,16 @@ export interface SnapshotScope {
 }
 
 /**
- * Réduit `routes`/`runs` à la portée demandée par la {@link SnapshotSelection}
- * (RFC-010), avant de les transmettre à `captureSnapshots` (RFC-009). Pour
- * `run`, `routes` est limité aux routes référencées par ce run, afin
- * qu'aucune autre route ne soit capturée comme « standalone » par erreur
- * (RFC-009 traite comme standalone toute route activée non référencée par un
- * run du sous-ensemble transmis).
+ * Reduce `routes`/`runs` to the scope requested by
+ * {@link SnapshotSelection} (RFC-010) before passing them to
+ * `captureSnapshots` (RFC-009). For `run`, `routes` is limited to the routes
+ * referenced by that run so no other route can be captured as standalone by
+ * mistake (RFC-009 treats any enabled route not referenced by a run in the
+ * provided subset as standalone).
  *
- * @throws {RunNotFoundError} `--runName` ne correspond à aucun run.
- * @throws {RouteNotFoundError} `--route` ne correspond à aucune route, ou ne
- *   fait pas partie du run sélectionné (`run-route`).
+ * @throws {RunNotFoundError} `--runName` does not match any run.
+ * @throws {RouteNotFoundError} `--route` does not match any route, or the
+ *   route is not part of the selected run (`run-route`).
  */
 export function resolveSnapshotScope(
   routes: readonly RawRoute[],
@@ -40,8 +40,8 @@ export function resolveSnapshotScope(
 
     case "route": {
       const route = findRouteByPath(routes, selection.routePath);
-      // Sélection CLI explicite : prime sur enableSnapshot (RFC-010) et sur
-      // le user configuré si --user est fourni.
+      // Explicit CLI selection takes precedence over enableSnapshot (RFC-010)
+      // and over the configured user when `--user` is provided.
       return {
         routes: [{ ...route, enableSnapshot: true, user: selection.user ?? route.user }],
         runs: [],

@@ -1,8 +1,8 @@
 import { SnapRunError } from "../errors/snaprun-error.js";
 
 /**
- * Affiche une erreur applicative (RFC-010) : le message seul par défaut, ou
- * la pile d'appels complète et la cause d'origine avec `--debug`.
+ * Print an application error (RFC-010): the message only by default, or the
+ * full stack trace and original cause with `--debug`.
  */
 export function printCliError(error: SnapRunError, debug: boolean): void {
   console.error(error.message);
@@ -11,7 +11,7 @@ export function printCliError(error: SnapRunError, debug: boolean): void {
     console.error(error.stack);
 
     if (error.cause !== undefined) {
-      console.error("Cause :", error.cause);
+      console.error("Cause:", error.cause);
     }
   }
 }

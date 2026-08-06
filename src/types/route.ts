@@ -4,5 +4,5 @@ import type { dynamicRouteSchema, routeSchema, staticRouteSchema } from "../sche
 export type RawStaticRoute = z.infer<typeof staticRouteSchema>;
 export type RawDynamicRoute = z.infer<typeof dynamicRouteSchema>;
 
-/** Route statique ou dynamique, telle que validée par le schéma. */
+/** Static or dynamic route as validated by the schema. */
 export type RawRoute = z.infer<typeof routeSchema>;

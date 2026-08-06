@@ -2,8 +2,9 @@ import { stat } from "node:fs/promises";
 import { join } from "node:path";
 
 /**
- * Fallback isolé (RFC-005) : retourne le premier répertoire existant parmi
- * `candidates` (ex. `["app", "src/app"]`), ou `undefined` si aucun n'existe.
+ * Isolated fallback (RFC-005): return the first existing directory from
+ * `candidates` (for example `["app", "src/app"]`), or `undefined` when none
+ * exists.
  */
 export async function findRouterDirectory(
   projectRoot: string,

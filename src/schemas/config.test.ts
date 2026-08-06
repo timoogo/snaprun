@@ -10,7 +10,7 @@ function fullConfig(): unknown {
       startCommand: "pnpm dev",
       autoStart: true,
     },
-    output: { directory: "./snapshots", fullPage: true },
+    output: { directory: "./snapshots", fullPage: true, structure: "flat" },
     auth: {
       loginRoute: "/sign-in",
       selectors: {
@@ -40,7 +40,7 @@ describe("configSchema", () => {
     if (result.success) {
       expect(result.data).toEqual({
         project: { root: ".", workingDirectory: ".", autoStart: false },
-        output: { directory: "./snapshots", fullPage: true },
+        output: { directory: "./snapshots", fullPage: true, structure: "flat" },
         routes: [],
         runs: [],
       });
@@ -86,8 +86,25 @@ describe("configSchema", () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.output).toEqual({ directory: "./snapshots", fullPage: false });
+      expect(result.data.output).toEqual({
+        directory: "./snapshots",
+        fullPage: false,
+        structure: "flat",
+      });
     }
+  });
+
+  it("accepts output.structure = 'run' and 'scope'", () => {
+    expect(configSchema.safeParse({ project: {}, output: { structure: "run" } }).success).toBe(true);
+    expect(configSchema.safeParse({ project: {}, output: { structure: "scope" } }).success).toBe(
+      true,
+    );
+  });
+
+  it("rejects an unknown output.structure value", () => {
+    expect(configSchema.safeParse({ project: {}, output: { structure: "grouped" } }).success).toBe(
+      false,
+    );
   });
 
   it("rejette un type invalide (autoStart non booléen)", () => {

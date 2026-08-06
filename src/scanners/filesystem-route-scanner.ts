@@ -9,10 +9,10 @@ const APP_DIRECTORY_CANDIDATES = ["app", "src/app"];
 const PAGES_DIRECTORY_CANDIDATES = ["pages", "src/pages"];
 
 /**
- * Moteur de scan natif (RFC-005) : détecte App Router et Pages Router en
- * s'appuyant sur les conventions de répertoires officielles de Next.js, sans
- * dépendance externe. Les deux routers sont scannés s'ils coexistent
- * (migration incrémentale).
+ * Native route scanner (RFC-005): detect App Router and Pages Router by
+ * following the official Next.js directory conventions, with no external
+ * dependency. Both routers are scanned when they coexist (incremental
+ * migration).
  */
 export class FilesystemRouteScanner implements RouteScanner {
   async scan(projectRoot: string): Promise<DiscoveredRoute[]> {

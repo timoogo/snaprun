@@ -1,10 +1,10 @@
 const DEFAULT_CHECK_TIMEOUT_MS = 2_000;
 
 /**
- * Teste si `baseUrl` répond (RFC-011) : toute réponse HTTP reçue, quel que
- * soit son code de statut, signifie qu'un serveur est déjà là et doit être
- * réutilisé tel quel. Seule une absence de réponse (connexion refusée, hôte
- * injoignable, délai dépassé) est traitée comme « non joignable ».
+ * Check whether `baseUrl` responds (RFC-011): any HTTP response, regardless
+ * of status code, means a server is already there and should be reused as-is.
+ * Only lack of response (connection refused, unreachable host, timeout) is
+ * treated as unreachable.
  */
 export async function isBaseUrlReachable(
   baseUrl: string,

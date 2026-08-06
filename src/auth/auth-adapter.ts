@@ -1,21 +1,21 @@
 import type { BrowserContext } from "playwright";
 
 /**
- * Abstraction légère d'authentification (RFC-007), volontairement minimale :
- * une seule méthode, indépendante de tout fournisseur (Better Auth,
- * NextAuth, formulaire maison...).
+ * Lightweight authentication abstraction (RFC-007), intentionally minimal:
+ * one method only, independent from any provider (Better Auth, NextAuth,
+ * custom forms, and so on).
  *
- * `context` est fourni par l'appelant (un run, RFC-008) : cet adaptateur ne
- * crée ni ne gère de contexte navigateur lui-même.
+ * `context` is provided by the caller (a run, RFC-008): this adapter neither
+ * creates nor manages browser contexts on its own.
  */
 export interface AuthAdapter {
   /**
-   * Authentifie `userId` sur `context`. Si `context` porte déjà une session
-   * valide pour cet utilisateur (connexion déjà effectuée dans ce run), ne
-   * refait aucune action réseau.
+   * Authenticate `userId` on `context`. If `context` already carries a valid
+   * session for that user (already logged in during this run), perform no
+   * additional network action.
    *
-   * @throws {UserNotFoundError} `userId` absent de la configuration.
-   * @throws {AuthenticationFailedError} La stratégie de succès configurée n'est jamais atteinte.
+   * @throws {UserNotFoundError} `userId` is not present in the configuration.
+   * @throws {AuthenticationFailedError} The configured success strategy is never reached.
    */
   login(context: BrowserContext, userId: string): Promise<void>;
 }

@@ -2,12 +2,12 @@ import { z } from "zod";
 import { computeParameterDiscrepancies } from "../domain/routes/compute-parameter-discrepancies.js";
 
 /**
- * Route dont le chemin contient des segments dynamiques (`[param]`).
+ * Route whose path contains dynamic segments (`[param]`).
  *
- * La cohérence entre `path` et `parameters` est vérifiée systématiquement au
- * parsing, que `snapshotPath` soit fourni ou non (RFC-004, correction post-
- * revue) : `snapshotPath` ne remplace que l'URL finale visitée, il ne
- * dispense jamais de la validation du modèle.
+ * The structural consistency between `path` and `parameters` is always
+ * validated during parsing, whether `snapshotPath` is provided or not
+ * (RFC-004, review follow-up): `snapshotPath` only overrides the final URL
+ * that gets visited and never bypasses model validation.
  */
 export const dynamicRouteSchema = z
   .object({
@@ -17,7 +17,8 @@ export const dynamicRouteSchema = z
     parameters: z.record(z.string(), z.string()),
     enableSnapshot: z.boolean(),
     user: z.string().optional(),
-    /** Remplace uniquement l'URL finale visitée quand fourni (RFC-004). */
+    scope: z.string().optional(),
+    /** Override only the final visited URL when provided (RFC-004). */
     snapshotPath: z.string().optional(),
   })
   .strict()
@@ -27,7 +28,7 @@ export const dynamicRouteSchema = z
     for (const name of missing) {
       ctx.addIssue({
         code: "custom",
-        message: `Paramètre dynamique manquant : ${name}`,
+        message: `Missing dynamic route parameter: ${name}`,
         path: ["parameters", name],
       });
     }
@@ -35,13 +36,13 @@ export const dynamicRouteSchema = z
     for (const name of unknown) {
       ctx.addIssue({
         code: "custom",
-        message: `Paramètre dynamique inconnu : ${name}`,
+        message: `Unknown dynamic route parameter: ${name}`,
         path: ["parameters", name],
       });
     }
   });
 
-/** Route à chemin fixe : `isDynamic` absent ou explicitement `false`. */
+/** Fixed-path route: `isDynamic` is omitted or explicitly `false`. */
 export const staticRouteSchema = z
   .object({
     id: z.string(),
@@ -49,7 +50,8 @@ export const staticRouteSchema = z
     isDynamic: z.literal(false).optional(),
     enableSnapshot: z.boolean(),
     user: z.string().optional(),
-    /** Prioritaire sur `path` quand fourni (RFC-004). */
+    scope: z.string().optional(),
+    /** Takes precedence over `path` when provided (RFC-004). */
     snapshotPath: z.string().optional(),
   })
   .strict();
@@ -57,9 +59,8 @@ export const staticRouteSchema = z
 export const routeSchema = z.union([dynamicRouteSchema, staticRouteSchema]);
 
 /**
- * Liste de routes : chaque élément est validé par {@link routeSchema}, et les
- * identifiants (`id`) doivent être uniques dans l'ensemble de la liste
- * (critère d'acceptation RFC-004).
+ * Route list: each entry is validated by {@link routeSchema}, and route ids
+ * (`id`) must be unique across the list (RFC-004 acceptance criterion).
  */
 export const routesSchema = z.array(routeSchema).superRefine((routes, ctx) => {
   const seenIds = new Set<string>();
@@ -68,7 +69,7 @@ export const routesSchema = z.array(routeSchema).superRefine((routes, ctx) => {
     if (seenIds.has(route.id)) {
       ctx.addIssue({
         code: "custom",
-        message: `Identifiant de route dupliqué : ${route.id}`,
+        message: `Duplicate route id: ${route.id}`,
         path: [index, "id"],
       });
     }

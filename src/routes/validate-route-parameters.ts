@@ -4,13 +4,13 @@ import type { RawDynamicRoute } from "../types/route.js";
 import { computeParameterDiscrepancies } from "../domain/routes/compute-parameter-discrepancies.js";
 
 /**
- * Valide la cohérence structurelle entre `path` et `parameters` d'une route
- * dynamique. Appelée systématiquement (RFC-004, correction post-revue),
- * indépendamment de la présence de `snapshotPath` : celui-ci ne remplace que
- * l'URL finale visitée, il ne dispense jamais de cette validation.
+ * Validate structural consistency between `path` and `parameters` for a
+ * dynamic route. Always called (RFC-004, review follow-up), regardless of
+ * whether `snapshotPath` is present: it only overrides the final visited URL
+ * and never replaces this validation step.
  *
- * @throws {DynamicParameterMissingError} Segment `[param]` sans valeur dans `parameters`.
- * @throws {DynamicParameterUnknownError} Clé de `parameters` non référencée dans `path`.
+ * @throws {DynamicParameterMissingError} A `[param]` segment has no value in `parameters`.
+ * @throws {DynamicParameterUnknownError} A `parameters` key is not referenced by `path`.
  */
 export function validateRouteParameters(route: RawDynamicRoute): void {
   const { missing, unknown } = computeParameterDiscrepancies(route.path, route.parameters);

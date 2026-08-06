@@ -5,13 +5,13 @@ import type { RawRoute } from "../types/route.js";
 import type { RawRun } from "../types/run.js";
 
 /**
- * Construit le plan d'exécution typé (RFC-008), avant toute ouverture de
- * navigateur : runs triés par `order` (égalité → ordre du tableau `runs`,
- * `Array.prototype.sort` étant stable), routes résolues dans l'ordre exact de
- * `run.routes`, utilisateur effectif calculé par run/route.
+ * Build the typed execution plan (RFC-008) before any browser is opened:
+ * runs sorted by `order` (ties keep the `runs` array order because
+ * `Array.prototype.sort` is stable), routes resolved in exact `run.routes`
+ * order, and effective user computed from run/route values.
  *
- * @throws {RouteNotFoundError} Un `run.routes` référence un identifiant absent de `routes`.
- * @throws {UserConflictError} `run.user` et `route.user` sont tous deux définis et diffèrent.
+ * @throws {RouteNotFoundError} A `run.routes` entry references an id missing from `routes`.
+ * @throws {UserConflictError} `run.user` and `route.user` are both defined and differ.
  */
 export function buildExecutionPlan(
   runs: readonly RawRun[],
@@ -41,10 +41,10 @@ function resolvePlannedRoute(
 }
 
 /**
- * Copie indépendante de `route` : ni la route elle-même ni son
- * `parameters` (route dynamique) ne sont partagés avec `config.routes`, afin
- * qu'une mutation ultérieure de la configuration chargée ne se répercute
- * jamais sur un plan déjà construit.
+ * Independent copy of `route`: neither the route itself nor its
+ * `parameters` (for dynamic routes) are shared with `config.routes`, so a
+ * later mutation of the loaded configuration never leaks into a plan that
+ * was already built.
  */
 function snapshotRoute(route: RawRoute): PlannedRouteSnapshot {
   if (route.isDynamic === true) {

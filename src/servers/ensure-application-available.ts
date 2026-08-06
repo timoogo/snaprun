@@ -12,25 +12,23 @@ export interface EnsureApplicationAvailableOptions {
   readonly autoStart: boolean;
   readonly startCommand: string | undefined;
   readonly workingDirectory: string;
-  /** Délai maximal d'attente de disponibilité après le lancement. Défaut : 30 s. */
+  /** Maximum wait time for availability after startup. Default: 30 s. */
   readonly startupTimeoutMs?: number;
 }
 
 /**
- * Garantit que l'application est joignable avant d'exécuter `action`
- * (RFC-011) : si `baseUrl` répond déjà, réutilise ce serveur tel quel et
- * n'y touche jamais. Sinon, si `autoStart`, lance `startCommand` depuis
- * `workingDirectory`, attend sa disponibilité, exécute `action`, puis
- * arrête — dans un `finally`, donc systématiquement — uniquement le
- * processus créé par cet appel. Un serveur externe déjà en place n'est
- * jamais arrêté : `stopApplication` n'est appelée que sur le processus que
- * cette fonction a elle-même lancé.
+ * Ensure the application is reachable before executing `action` (RFC-011):
+ * if `baseUrl` already responds, reuse that server as-is and never touch it.
+ * Otherwise, when `autoStart` is enabled, launch `startCommand` from
+ * `workingDirectory`, wait for readiness, execute `action`, then stop only
+ * the process created by this call, always from a `finally` block. An
+ * external server that was already running is never stopped:
+ * `stopApplication` is called only for the process launched here.
  *
- * @throws {ApplicationUnreachableError} `baseUrl` ne répond pas et
- *   `autoStart` est désactivé, ou le délai d'attente de disponibilité est
- *   dépassé après le lancement.
- * @throws {ApplicationStartFailedError} `autoStart` est activé sans
- *   `startCommand`, ou le processus lancé quitte avant de devenir joignable.
+ * @throws {ApplicationUnreachableError} `baseUrl` does not respond and
+ *   `autoStart` is disabled, or the readiness timeout expires after startup.
+ * @throws {ApplicationStartFailedError} `autoStart` is enabled without
+ *   `startCommand`, or the launched process exits before becoming reachable.
  */
 export async function ensureApplicationAvailable<T>(
   options: EnsureApplicationAvailableOptions,
@@ -45,7 +43,7 @@ export async function ensureApplicationAvailable<T>(
   }
 
   if (options.startCommand === undefined) {
-    throw new ApplicationStartFailedError("(aucune startCommand configurée)");
+    throw new ApplicationStartFailedError("(no startCommand configured)");
   }
 
   const app = spawnApplication(options.startCommand, options.workingDirectory);
@@ -72,7 +70,7 @@ async function waitUntilReady(
     if (app.hasExited()) {
       throw new ApplicationStartFailedError(startCommand, {
         cause: new Error(
-          `Code de sortie ${String(app.exitCode())}${app.capturedOutput() !== "" ? ` : ${app.capturedOutput()}` : ""}`,
+          `Exit code ${String(app.exitCode())}${app.capturedOutput() !== "" ? `: ${app.capturedOutput()}` : ""}`,
         ),
       });
     }
@@ -92,11 +90,10 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Best-effort : si le process SnapRun reçoit SIGINT/SIGTERM pendant que
- * l'application est en cours d'exécution, l'arrêter avant de laisser le
- * signal suivre son cours normal (RFC-011 : « gérer les signaux »).
- * `once()` : après le premier déclenchement, le comportement par défaut de
- * Node reprend la main pour le second envoi du signal.
+ * Best effort: if the SnapRun process receives SIGINT/SIGTERM while the
+ * application is running, stop it before letting the signal continue through
+ * its normal path (RFC-011: "handle signals"). `once()` ensures Node's
+ * default behavior resumes on a second signal delivery.
  */
 function installShutdownSignalHandlers(app: RunningApplication): () => void {
   const handleSignal = (signal: NodeJS.Signals): void => {

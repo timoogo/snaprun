@@ -5,36 +5,36 @@ import { validateRouteParameters } from "./validate-route-parameters.js";
 const PARAMETER_PATTERN = /\[([A-Za-z_][A-Za-z0-9_]*)\]/g;
 
 /**
- * Résout le chemin final d'une route.
+ * Resolve the final path for a route.
  *
- * La cohérence entre `path` et `parameters` d'une route dynamique est
- * toujours vérifiée (RFC-004, correction post-revue), même quand
- * `snapshotPath` est fourni : celui-ci ne remplace que l'URL finale
- * visitée, il ne dispense jamais de la validation du modèle.
+ * The structural consistency between `path` and `parameters` for a dynamic
+ * route is always validated (RFC-004, review follow-up), even when
+ * `snapshotPath` is provided: it only overrides the final visited URL and
+ * never bypasses model validation.
  *
- * Priorité de résolution : `snapshotPath` s'il est fourni, sinon
- * substitution des segments `[param]` de `path` par les valeurs de
- * `parameters` (encodées pour l'URL).
+ * Resolution priority: use `snapshotPath` when provided, otherwise replace
+ * `[param]` segments from `path` with `parameters` values (URL-encoded).
  *
- * @throws {DynamicParameterMissingError} Segment `[param]` sans valeur dans `parameters`.
- * @throws {DynamicParameterUnknownError} Clé de `parameters` non référencée dans `path`.
+ * @throws {DynamicParameterMissingError} A `[param]` segment has no value in `parameters`.
+ * @throws {DynamicParameterUnknownError} A `parameters` key is not referenced by `path`.
  */
 export function resolveRoutePath(route: RawRoute): string {
   if (!route.isDynamic) {
     return route.snapshotPath ?? route.path;
   }
 
-  // Appelée même quand `snapshotPath` est fourni : voir la note ci-dessus.
+  // Called even when `snapshotPath` is provided: see the note above.
   validateRouteParameters(route);
 
   return route.snapshotPath ?? substituteDynamicPath(route);
 }
 
 /**
- * Suppose une route déjà validée par {@link validateRouteParameters} (appelée
- * juste avant dans {@link resolveRoutePath}). Le contrôle de présence
- * ci-dessous reste une défense en profondeur si cette fonction venait à être
- * appelée directement sur une donnée non validée.
+ * Assume the route has already been validated by
+ * {@link validateRouteParameters} (called just before in
+ * {@link resolveRoutePath}). The presence check below remains a
+ * defense-in-depth safeguard if this function is ever called directly on
+ * unvalidated data.
  */
 function substituteDynamicPath(route: RawDynamicRoute): string {
   return route.path.replace(PARAMETER_PATTERN, (_match, parameterName: string) => {

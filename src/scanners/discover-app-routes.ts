@@ -20,7 +20,7 @@ const EXCLUDED_BASENAMES = new Set([
   "global-error",
 ]);
 
-/** Découvre les pages d'un répertoire App Router (`app/` ou `src/app/`). */
+/** Discover pages in an App Router directory (`app/` or `src/app/`). */
 export async function discoverAppRoutes(appDir: string): Promise<DiscoveredRoute[]> {
   const routes: DiscoveredRoute[] = [];
   await walk(appDir, []);
@@ -31,13 +31,13 @@ export async function discoverAppRoutes(appDir: string): Promise<DiscoveredRoute
 
     for (const entry of entries) {
       if (entry.isDirectory()) {
-        // Dossiers privés (_), slots parallèles (@) et routes interceptantes
-        // ((.), (..), (..)(..), (...)) : jamais parcourus. Pour les routes
-        // interceptantes, leur URL canonique dépend du nombre de niveaux
-        // remontés par rapport à la position du dossier — non résolu en V1
-        // (RFC-005) ; les exclure entièrement du scan est le seul moyen sûr
-        // d'éviter de produire un segment d'URL inexistant comme
-        // `(.)photo` ou `(..)modal`.
+        // Private folders (_), parallel slots (@), and intercepting routes
+        // ((.), (..), (..)(..), (...)) are never traversed. For intercepting
+        // routes, the canonical URL depends on how many levels are traversed
+        // relative to the directory position, which is not resolved in V1
+        // (RFC-005). Excluding them from the scan is the only safe way to
+        // avoid generating a nonexistent URL segment such as `(.)photo` or
+        // `(..)modal`.
         if (
           entry.name.startsWith("_") ||
           entry.name.startsWith("@") ||

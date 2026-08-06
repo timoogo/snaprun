@@ -2,9 +2,9 @@ import type { RawRoute } from "../types/route.js";
 import type { RawRun } from "../types/run.js";
 
 /**
- * Routes capturées hors run (RFC-009) : `enableSnapshot: true` et jamais
- * référencées par `run.routes` d'un run. Ordre préservé de `routes` (aucun
- * ordre de run ne s'applique à ces captures indépendantes).
+ * Routes captured outside any run (RFC-009): `enableSnapshot: true` and never
+ * referenced by any `run.routes`. Preserve `routes` order because no run
+ * ordering applies to these independent captures.
  */
 export function selectStandaloneRoutes(
   routes: readonly RawRoute[],

@@ -5,7 +5,7 @@ export class UserNotFoundError extends SnapRunError {
   readonly userId: string;
 
   constructor(userId: string) {
-    super(`Utilisateur introuvable dans la configuration d'authentification : ${userId}`);
+    super(`User not found in authentication configuration: ${userId}`);
     this.userId = userId;
   }
 }

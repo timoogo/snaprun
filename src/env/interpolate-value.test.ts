@@ -48,7 +48,7 @@ describe("interpolateValue", () => {
       const missingError = error as EnvVariableMissingError;
       expect(missingError.code).toBe("ENV_VARIABLE_MISSING");
       expect(missingError.variableName).toBe("MISSING_SECRET");
-      expect(missingError.message).toBe("Variable d'environnement manquante : MISSING_SECRET");
+      expect(missingError.message).toBe("Missing environment variable: MISSING_SECRET");
     }
   });
 
@@ -62,7 +62,7 @@ describe("interpolateValue", () => {
     } catch (error) {
       const missingError = error as EnvVariableMissingError;
       expect(missingError.message).not.toContain("top-secret-value");
-      expect(missingError.message).toBe("Variable d'environnement manquante : MISSING");
+      expect(missingError.message).toBe("Missing environment variable: MISSING");
     }
   });
 });

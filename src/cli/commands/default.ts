@@ -7,7 +7,6 @@ import type { GlobalCliOptions } from "../global-cli-options.js";
 import { printCliError } from "../print-cli-error.js";
 
 interface DefaultCommandOptions {
-  readonly config?: string;
   readonly runName?: string;
   readonly partial?: boolean;
   readonly route?: string;
@@ -15,29 +14,29 @@ interface DefaultCommandOptions {
 }
 
 /**
- * Enregistre l'action par défaut du programme (sans nom de sous-commande,
- * RFC-010) : capture tous les runs, ou une portée réduite selon les options
+ * Register the default program action (no subcommand name, RFC-010):
+ * capture every run, or a narrower scope depending on the selected options
  * (`--runName`, `--partial`, `--route`, `--user`).
  */
 export function registerDefaultCommand(program: Command): void {
   program
-    .option("--config <path>", "Chemin explicite vers le fichier de configuration")
-    .option("--runName <name>", "N'exécute qu'un seul run")
+    .option("--runName <name>", "Capture only one configured run")
     .option(
       "--partial",
-      "Limite un run à ses routes explicitement référencées et activées (nécessite --runName ; en V1, comportement déjà identique au mode normal)",
+      "Requires --runName. Currently retained for CLI compatibility and does not change route selection.",
     )
-    .option("--route <path>", "Capture une seule route, identifiée par son chemin")
-    .option("--user <name>", "Utilisateur pour --route utilisée hors run")
+    .option("--route <path>", "Capture one configured route by path")
+    .option("--user <name>", "Use this user when capturing a route outside a run")
     .action(async (options: DefaultCommandOptions, command: Command) => {
-      const { debug } = command.optsWithGlobals<GlobalCliOptions>();
+      const { config, debug } = command.optsWithGlobals<GlobalCliOptions>();
 
       try {
         const selection = resolveSnapshotSelection(options);
         const report = await runSnapshots({
           cwd: process.cwd(),
-          explicitConfigPath: options.config,
+          explicitConfigPath: config,
           selection,
+          onWarning: (message) => console.warn(message),
         });
 
         console.log(formatSnapshotReport(report));

@@ -2,19 +2,19 @@ import type { z } from "zod";
 import type { configSchema } from "../schemas/config.js";
 
 /**
- * Configuration brute : résultat direct de la validation Zod.
+ * Raw configuration: direct result of Zod validation.
  *
- * Les valeurs par défaut du schéma (ex. `project.autoStart`, `output`,
- * `routes`, `runs`) sont déjà appliquées, mais les chemins (`project.root`,
- * `project.workingDirectory`) restent relatifs, tels qu'écrits dans le
- * fichier de configuration.
+ * Schema defaults (for example `project.autoStart`, `output`, `routes`, and
+ * `runs`) are already applied, but paths (`project.root`,
+ * `project.workingDirectory`) stay relative exactly as written in the
+ * configuration file.
  */
 export type RawConfig = z.infer<typeof configSchema>;
 
 /**
- * Configuration résolue : dérivée de {@link RawConfig} en remplaçant
- * `project.root` et `project.workingDirectory` par leurs chemins absolus
- * (RFC-002). C'est cette forme que consomment les commandes.
+ * Resolved configuration: derived from {@link RawConfig} by replacing
+ * `project.root` and `project.workingDirectory` with absolute paths
+ * (RFC-002). Commands consume this form.
  */
 export interface ResolvedConfig extends Omit<RawConfig, "project"> {
   readonly configFilePath: string;

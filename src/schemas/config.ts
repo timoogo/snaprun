@@ -4,17 +4,15 @@ import { routesSchema } from "./route.js";
 import { runsSchema } from "./run.js";
 
 /**
- * Seul `project` est une section obligatoire (RFC-002, correction demandée
- * après revue). Toutes ses valeurs ont des valeurs par défaut sûres, sauf
- * `baseUrl` et `startCommand` :
- * - `root` défaut `"."` ;
- * - `workingDirectory` défaut `"."`, donc résolu sur `root` quand absent ;
- * - `autoStart` défaut `false` pour ne jamais lancer un processus
- *   implicitement ;
- * - `baseUrl` et `startCommand` restent optionnels au chargement de la
- *   configuration : leur nécessité dépend de la commande exécutée (une
- *   capture a besoin de `baseUrl`, un auto-start a besoin de
- *   `startCommand`) et sera validée par ces commandes futures, pas ici.
+ * Only `project` is required (RFC-002, review follow-up). Every field has a
+ * safe default except `baseUrl` and `startCommand`:
+ * - `root` defaults to `"."`;
+ * - `workingDirectory` defaults to `"."`, so it resolves from `root` when omitted;
+ * - `autoStart` defaults to `false` so SnapRun never starts a process implicitly;
+ * - `baseUrl` and `startCommand` stay optional during configuration loading:
+ *   whether they are required depends on the command being executed
+ *   (snapshot capture needs `baseUrl`, auto-start needs `startCommand`) and
+ *   is validated by those commands instead of here.
  */
 const projectSchema = z.object({
   root: z.string().default("."),
@@ -24,18 +22,19 @@ const projectSchema = z.object({
   autoStart: z.boolean().default(false),
 });
 
-/** Section optionnelle : valeurs par défaut si `output` (ou un de ses champs) est absent. */
+/** Optional section with defaults when `output` or one of its fields is omitted. */
 const outputSchema = z
   .object({
     directory: z.string().default("./snapshots"),
     fullPage: z.boolean().default(true),
+    structure: z.enum(["flat", "run", "scope"]).default("flat"),
   })
   .default({});
 
 /**
- * `routes` utilise le modèle complet défini par RFC-004 (src/schemas/route.ts).
- * `runs` utilise le modèle complet défini par RFC-008 (src/schemas/run.ts).
- * Les deux sections sont optionnelles (défaut `[]`).
+ * `routes` uses the complete model defined by RFC-004 (`src/schemas/route.ts`).
+ * `runs` uses the complete model defined by RFC-008 (`src/schemas/run.ts`).
+ * Both sections are optional and default to `[]`.
  */
 export const configSchema = z.object({
   project: projectSchema,

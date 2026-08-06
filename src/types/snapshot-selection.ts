@@ -1,11 +1,11 @@
 /**
- * Portée d'exécution demandée par la CLI (RFC-010) :
- * - `all` : tous les runs, plus les routes standalone (comportement par défaut, sans option) ;
- * - `run` : un seul run (`--runName`) ; `--partial` n'a, en V1, aucun effet
- *   supplémentaire — un run ne capture déjà que ses routes explicitement
- *   référencées et activées ;
- * - `route` : une route isolée, hors run (`--route`, avec `--user` optionnel) ;
- * - `run-route` : une seule route d'un run donné (`--runName` + `--route`).
+ * Execution scope requested by the CLI (RFC-010):
+ * - `all`: every run plus standalone routes (default behavior, no option);
+ * - `run`: a single run (`--runName`); in V1, `--partial` adds no extra
+ *   effect because a run already captures only the routes it explicitly
+ *   references and enables;
+ * - `route`: a single route outside any run (`--route`, with optional `--user`);
+ * - `run-route`: one route inside a specific run (`--runName` + `--route`).
  */
 export type SnapshotSelection =
   | { readonly kind: "all" }

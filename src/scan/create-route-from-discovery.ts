@@ -5,17 +5,16 @@ import { generateRouteId } from "./generate-route-id.js";
 import { PLACEHOLDER_PARAMETER_VALUE } from "./placeholder-parameter-value.js";
 
 /**
- * Construit l'entrée `Route` à ajouter à la configuration pour une route
- * découverte (appelée uniquement pour des routes sans segment catch-all,
- * filtrées en amont par `mergeDiscoveredRoutes` — voir `hasCatchAllSegment`).
+ * Build the `Route` entry to add to configuration for a discovered route.
+ * This is called only for routes without catch-all segments, filtered
+ * upstream by `mergeDiscoveredRoutes`; see `hasCatchAllSegment`.
  *
- * `enableSnapshot` (option `--default`) ne s'applique qu'aux routes
- * statiques. Une route dynamique reçoit toujours des valeurs de paramètres
- * placeholder ({@link PLACEHOLDER_PARAMETER_VALUE}) : sa valeur réelle
- * n'est jamais connue au moment du scan, elle est donc **toujours** créée
- * avec `enableSnapshot: false`, y compris avec `--default=enabled`, pour ne
- * jamais capturer automatiquement une URL volontairement incorrecte
- * (correction post-revue, RFC-006).
+ * `enableSnapshot` (the `--default` option) applies only to static routes.
+ * A dynamic route always receives placeholder parameter values
+ * ({@link PLACEHOLDER_PARAMETER_VALUE}) because its real value is never known
+ * at scan time. It is therefore always created with `enableSnapshot: false`,
+ * even with `--default=enabled`, to avoid automatically capturing a
+ * deliberately incorrect URL (review follow-up, RFC-006).
  */
 export function createRouteFromDiscovery(
   discovered: DiscoveredRoute,

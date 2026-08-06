@@ -1,12 +1,12 @@
 import { SnapRunError } from "./snaprun-error.js";
 
-/** Le message ne porte que le nom de la variable : jamais de valeur, jamais de secret. */
+/** The message includes only the variable name: never a value, never a secret. */
 export class EnvVariableMissingError extends SnapRunError {
   readonly code = "ENV_VARIABLE_MISSING";
   readonly variableName: string;
 
   constructor(variableName: string) {
-    super(`Variable d'environnement manquante : ${variableName}`);
+    super(`Missing environment variable: ${variableName}`);
     this.variableName = variableName;
   }
 }

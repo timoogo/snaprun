@@ -6,7 +6,7 @@ export class DynamicParameterMissingError extends SnapRunError {
   readonly parameterName: string;
 
   constructor(routeId: string, parameterName: string) {
-    super(`Paramètre dynamique manquant pour la route '${routeId}' : ${parameterName}`);
+    super(`Missing dynamic route parameter for '${routeId}': ${parameterName}`);
     this.routeId = routeId;
     this.parameterName = parameterName;
   }

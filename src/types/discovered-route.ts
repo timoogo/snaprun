@@ -1,10 +1,10 @@
-/** Router Next.js d'origine d'une route découverte. */
+/** Source Next.js router for a discovered route. */
 export type RouterKind = "app" | "pages";
 
 /**
- * Route découverte par un {@link RouteScanner} (RFC-005). `path` conserve les
- * segments dynamiques littéraux (`[id]`, `[...slug]`, `[[...slug]]`),
- * compatibles avec la syntaxe attendue par le modèle de route de RFC-004.
+ * Route discovered by a {@link RouteScanner} (RFC-005). `path` keeps literal
+ * dynamic segments (`[id]`, `[...slug]`, `[[...slug]]`) so it stays
+ * compatible with the route model syntax expected by RFC-004.
  */
 export interface DiscoveredRoute {
   readonly path: string;

@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 /**
- * Un run associe un ensemble ordonné de routes (référencées par `id`, RFC-004)
- * à un utilisateur optionnel. `order` détermine l'ordre d'exécution des runs
- * entre eux (RFC-008) ; l'ordre du tableau `routes` est l'ordre exact des
- * captures au sein du run.
+ * A run associates an ordered set of routes (referenced by `id`, RFC-004)
+ * with an optional user. `order` defines the execution order between runs
+ * (RFC-008), while the `routes` array order is the exact capture order
+ * within the run.
  */
 export const runSchema = z
   .object({
@@ -16,9 +16,9 @@ export const runSchema = z
   .strict();
 
 /**
- * Liste de runs : chaque élément est validé par {@link runSchema}, et les
- * noms (`runName`) doivent être uniques dans l'ensemble de la liste
- * (RFC-008, cohérent avec l'unicité des `id` de route en RFC-004).
+ * Run list: each entry is validated by {@link runSchema}, and run names
+ * (`runName`) must be unique across the list (RFC-008, consistent with route
+ * id uniqueness in RFC-004).
  */
 export const runsSchema = z.array(runSchema).superRefine((runs, ctx) => {
   const seenNames = new Set<string>();
@@ -27,7 +27,7 @@ export const runsSchema = z.array(runSchema).superRefine((runs, ctx) => {
     if (seenNames.has(run.runName)) {
       ctx.addIssue({
         code: "custom",
-        message: `Nom de run dupliqué : ${run.runName}`,
+        message: `Duplicate run name: ${run.runName}`,
         path: [index, "runName"],
       });
     }

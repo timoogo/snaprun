@@ -1,7 +1,7 @@
 {
   "name": "@timoogo/snaprun",
   "version": "0.1.0",
-  "description": "SnapRun — outil de scan et de snapshot automatisé d'applications Next.js.",
+  "description": "SnapRun - automated route discovery and screenshot capture for Next.js applications.",
   "type": "module",
   "license": "MIT",
   "repository": {

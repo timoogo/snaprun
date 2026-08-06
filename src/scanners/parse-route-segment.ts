@@ -9,12 +9,12 @@ const CATCH_ALL_PATTERN = /^\[\.\.\.[A-Za-z_][A-Za-z0-9_]*]$/;
 const DYNAMIC_PATTERN = /^\[[A-Za-z_][A-Za-z0-9_]*]$/;
 
 /**
- * Classifie un segment de chemin Next.js (nom de dossier ou de fichier sans
- * extension) : statique, dynamique (`[id]`), catch-all (`[...slug]`) ou
- * catch-all optionnel (`[[...slug]]`).
+ * Classify a Next.js route segment (directory name or file name without an
+ * extension): static, dynamic (`[id]`), catch-all (`[...slug]`), or optional
+ * catch-all (`[[...slug]]`).
  *
- * Point d'extension unique (RFC-005) pour une future résolution complète des
- * segments catch-all — non implémentée ici, seulement reconnue.
+ * Single extension point (RFC-005) for future complete catch-all resolution.
+ * For now, catch-all segments are recognized but not resolved.
  */
 export function parseRouteSegment(segment: string): ParsedRouteSegment {
   if (OPTIONAL_CATCH_ALL_PATTERN.test(segment)) {
@@ -32,17 +32,16 @@ export function parseRouteSegment(segment: string): ParsedRouteSegment {
   return { kind: "static" };
 }
 
-/** Un segment est dynamique dès lors qu'il n'est pas classifié `static`. */
+/** A segment is dynamic whenever it is not classified as `static`. */
 export function isDynamicSegment(segment: string): boolean {
   return parseRouteSegment(segment).kind !== "static";
 }
 
 /**
- * Vrai si un chemin complet (ex. `/docs/[...slug]`) contient un segment
- * catch-all ou catch-all optionnel. Leur résolution (construction d'une URL
- * concrète) n'est pas prise en charge (RFC-004/005) : ce détecteur permet à
- * RFC-006 de ne jamais les enregistrer automatiquement dans `routes` comme
- * s'ils ne nécessitaient aucun paramètre.
+ * True when a full path (for example `/docs/[...slug]`) contains a catch-all
+ * or optional catch-all segment. Their resolution (building a concrete URL)
+ * is not supported by RFC-004/005, so this detector lets RFC-006 avoid
+ * auto-registering them in `routes` as if they needed no parameters.
  */
 export function hasCatchAllSegment(path: string): boolean {
   return path
@@ -52,20 +51,21 @@ export function hasCatchAllSegment(path: string): boolean {
     );
 }
 
-/** Vrai pour un dossier de type route group App Router : `(marketing)`. */
+/** True for an App Router route-group directory such as `(marketing)`. */
 export function isRouteGroupSegment(segment: string): boolean {
   return /^\([^/]+\)$/.test(segment);
 }
 
 /**
- * Marqueurs de route interceptante App Router (`(.)`, `(..)`, `(..)(..)`,
- * `(...)`), toujours accolés au nom du segment intercepté (ex. `(.)photo`).
+ * App Router intercepting route markers (`(.)`, `(..)`, `(..)(..)`,
+ * `(...)`), always prefixed directly onto the intercepted segment name
+ * (for example `(.)photo`).
  *
- * RFC-005 (V1) : leur URL canonique ne peut pas être déterminée proprement
- * sans résoudre le nombre de niveaux remontés par rapport à la position du
- * dossier dans l'arborescence — non implémenté ici. Cette fonction sert
- * uniquement à les détecter pour les exclure du scan en sécurité (voir
- * `discoverAppRoutes`), jamais à les transformer en segment d'URL.
+ * RFC-005 (V1): their canonical URL cannot be determined correctly without
+ * resolving how many levels are traversed relative to the directory
+ * position. That is not implemented here. This function exists only to
+ * detect them and exclude them safely from scanning (see
+ * `discoverAppRoutes`), never to turn them into URL segments.
  */
 const INTERCEPTING_ROUTE_PREFIXES = ["(..)(..)", "(...)", "(..)", "(.)"] as const;
 

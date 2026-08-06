@@ -19,10 +19,10 @@ describe("formatSnapshotReport", () => {
 
     const output = formatSnapshotReport(report);
 
-    expect(output).toContain("Run : member (1)");
+    expect(output).toContain("Run: member (1)");
     expect(output).toContain("home");
     expect(output).toContain("/out/member/01-home.png");
-    expect(output).toContain("Terminé avec succès (42 ms).");
+    expect(output).toContain("Completed successfully (42 ms).");
   });
 
   it("liste les captures standalone séparément", () => {
@@ -34,7 +34,7 @@ describe("formatSnapshotReport", () => {
       failure: undefined,
     };
 
-    expect(formatSnapshotReport(report)).toContain("Hors run (1)");
+    expect(formatSnapshotReport(report)).toContain("Standalone (1)");
   });
 
   it("affiche l'échec et le statut final d'échec quand le rapport a échoué", () => {
@@ -43,13 +43,13 @@ describe("formatSnapshotReport", () => {
       durationMs: 7,
       runs: [],
       standalone: [],
-      failure: { routeId: "bad", runName: "member", message: "connexion refusée" },
+      failure: { routeId: "bad", runName: "member", message: "connection refused" },
     };
 
     const output = formatSnapshotReport(report);
 
-    expect(output).toContain("Échec : bad (run member) — connexion refusée");
-    expect(output).toContain("Terminé en échec (7 ms).");
+    expect(output).toContain("Failed: bad (run member) - connection refused");
+    expect(output).toContain("Completed with failures (7 ms).");
   });
 
   it("n'affiche pas de mention de run pour l'échec d'une route standalone", () => {
@@ -61,6 +61,6 @@ describe("formatSnapshotReport", () => {
       failure: { routeId: "bad", runName: undefined, message: "boom" },
     };
 
-    expect(formatSnapshotReport(report)).toContain("Échec : bad — boom");
+    expect(formatSnapshotReport(report)).toContain("Failed: bad - boom");
   });
 });

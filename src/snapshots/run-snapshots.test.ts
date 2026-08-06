@@ -64,6 +64,47 @@ describe("runSnapshots", () => {
     expect(existsSync(join(dir, "out", "standalone", "extra.png"))).toBe(true);
   });
 
+  it("reuses a single run id for every screenshot when output.structure = 'run'", async () => {
+    writeConfig({
+      project: { baseUrl: server.baseUrl },
+      output: { directory: "./out", structure: "run" },
+      routes: [
+        { id: "home", path: "/home", enableSnapshot: true },
+        { id: "calendar", path: "/calendar", enableSnapshot: true },
+      ],
+      runs: [{ runName: "member", order: 1, routes: ["home", "calendar"] }],
+    });
+
+    await runSnapshots({
+      cwd: dir,
+      selection: { kind: "all" },
+      launchBrowser,
+      now: () => new Date("2026-08-06T18:56:00"),
+    });
+
+    expect(existsSync(join(dir, "out", "run", "2026-08-06_1856", "home", "page.png"))).toBe(true);
+    expect(existsSync(join(dir, "out", "run", "2026-08-06_1856", "calendar", "page.png"))).toBe(
+      true,
+    );
+  });
+
+  it("stores screenshots under their scope when output.structure = 'scope'", async () => {
+    writeConfig({
+      project: { baseUrl: server.baseUrl },
+      output: { directory: "./out", structure: "scope" },
+      routes: [
+        { id: "home", path: "/home", scope: "public", enableSnapshot: true },
+        { id: "calendar", path: "/calendar", enableSnapshot: true },
+      ],
+      runs: [],
+    });
+
+    await runSnapshots({ cwd: dir, selection: { kind: "all" }, launchBrowser });
+
+    expect(existsSync(join(dir, "out", "public", "home", "page.png"))).toBe(true);
+    expect(existsSync(join(dir, "out", "unscoped", "calendar", "page.png"))).toBe(true);
+  });
+
   it("résout output.directory relativement à project.root, pas au cwd du process ni au répertoire du fichier de configuration quand ils diffèrent", async () => {
     mkdirSync(join(dir, "app"), { recursive: true });
     writeConfig({

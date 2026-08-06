@@ -1,4 +1,4 @@
-import { findConfigFile } from "../config/find-config-file.js";
+import { rememberConfigPath, resolveConfigPath } from "../config/resolve-config-path.js";
 import { readConfigFile } from "../config/read-config-file.js";
 import { resolveConfigPaths } from "../config/resolve-config-paths.js";
 import { validateConfig } from "../config/validate-config.js";
@@ -11,27 +11,36 @@ import { replaceRoutesInRawConfig } from "./replace-routes-in-raw-config.js";
 
 export interface RunScanOptions {
   readonly cwd: string;
-  /** Valeur de `enableSnapshot` pour les nouvelles routes (option `--default`). */
+  readonly explicitConfigPath?: string | undefined;
+  /** `enableSnapshot` value to use for new routes (the `--default` option). */
   readonly defaultEnableSnapshot: boolean;
-  /** Injectable pour les tests ; par défaut `NextjsRouteScanner`. */
+  /** Injectable for tests; defaults to `NextjsRouteScanner`. */
   readonly scanner?: RouteScanner | undefined;
+  readonly onWarning?: ((message: string) => void) | undefined;
 }
 
 /**
- * Exécute `snaprun scan` (RFC-006) : détecte les routes du projet, fusionne
- * avec la configuration existante (ajout des nouvelles routes uniquement,
- * signalement des routes obsolètes sans suppression) et écrit le fichier de
- * façon atomique — uniquement si de nouvelles routes ont été ajoutées, et en
- * ne modifiant que la clé `routes`.
+ * Execute `snaprun scan` (RFC-006): discover project routes, merge them into
+ * the existing configuration (add only new routes, report obsolete routes
+ * without deleting them), and write the file atomically only when new routes
+ * were added, changing only the `routes` key.
  *
- * @throws {ConfigNotFoundError} Aucun fichier de configuration trouvé.
- * @throws {ConfigInvalidError} Configuration invalide (avant ou après fusion).
+ * @throws {ConfigNotFoundError} No configuration file was found.
+ * @throws {ConfigInvalidError} Configuration is invalid before or after merge.
  */
 export async function runScan(options: RunScanOptions): Promise<ScanResult> {
-  const configFilePath = findConfigFile({ cwd: options.cwd });
-  const rawConfig = readConfigFile(configFilePath);
-  const validatedConfig = validateConfig(rawConfig, configFilePath);
-  const resolvedConfig = resolveConfigPaths(validatedConfig, configFilePath);
+  const configResolution = resolveConfigPath({
+    cwd: options.cwd,
+    explicitConfigPath: options.explicitConfigPath,
+    onWarning: options.onWarning,
+  });
+  const rawConfig = readConfigFile(configResolution.path);
+  const validatedConfig = validateConfig(rawConfig, configResolution.path);
+  const resolvedConfig = resolveConfigPaths(validatedConfig, configResolution.path);
+
+  if (configResolution.source === "explicit") {
+    rememberConfigPath(options.cwd, configResolution.path);
+  }
 
   const scanner = options.scanner ?? new NextjsRouteScanner();
   const discoveredRoutes = await scanner.scan(resolvedConfig.project.root);
@@ -46,10 +55,17 @@ export async function runScan(options: RunScanOptions): Promise<ScanResult> {
 
   if (added.length > 0) {
     const nextRawConfig = replaceRoutesInRawConfig(rawConfig, mergedRoutes);
-    validateConfig(nextRawConfig, configFilePath);
-    writeConfigFile(configFilePath, nextRawConfig);
+    validateConfig(nextRawConfig, configResolution.path);
+    writeConfigFile(configResolution.path, nextRawConfig);
     fileModified = true;
   }
 
-  return { configFilePath, added, unchanged, obsolete, unsupportedCatchAll, fileModified };
+  return {
+    configFilePath: configResolution.path,
+    added,
+    unchanged,
+    obsolete,
+    unsupportedCatchAll,
+    fileModified,
+  };
 }

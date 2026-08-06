@@ -1,13 +1,13 @@
 /**
- * Segment dynamique reconnu : `[name]` (RFC-004).
+ * Recognized dynamic segment: `[name]` (RFC-004).
  *
- * Point d'extension unique pour RFC-005 : les segments Next.js `[...slug]`
- * (catch-all) et `[[...slug]]` (catch-all optionnel) s'ajouteront ici, sans
- * modifier les appelants (schéma de validation, résolveur de chemin).
+ * Single extension point for RFC-005: Next.js `[...slug]` (catch-all) and
+ * `[[...slug]]` (optional catch-all) segments can be added here without
+ * changing callers such as the validation schema or path resolver.
  */
 const PARAMETER_PATTERN = /\[([A-Za-z_][A-Za-z0-9_]*)\]/g;
 
-/** Extrait, dans l'ordre d'apparition et sans doublon, les noms de paramètres d'un chemin. */
+/** Extract path parameter names in appearance order, without duplicates. */
 export function extractPathParameterNames(path: string): string[] {
   const names: string[] = [];
   const seen = new Set<string>();

@@ -6,7 +6,7 @@ export class DynamicParameterUnknownError extends SnapRunError {
   readonly parameterName: string;
 
   constructor(routeId: string, parameterName: string) {
-    super(`Paramètre dynamique inconnu pour la route '${routeId}' : ${parameterName}`);
+    super(`Unknown dynamic route parameter for '${routeId}': ${parameterName}`);
     this.routeId = routeId;
     this.parameterName = parameterName;
   }

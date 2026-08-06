@@ -2,8 +2,8 @@ import { dirname, resolve } from "node:path";
 import type { RawConfig, ResolvedConfig } from "../types/config.js";
 
 /**
- * Résout `project.root` (relatif au fichier de configuration) et
- * `project.workingDirectory` (relatif à `root`) en chemins absolus.
+ * Resolve `project.root` (relative to the configuration file) and
+ * `project.workingDirectory` (relative to `root`) into absolute paths.
  */
 export function resolveConfigPaths(config: RawConfig, configFilePath: string): ResolvedConfig {
   const configDir = dirname(configFilePath);

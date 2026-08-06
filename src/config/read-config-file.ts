@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { ConfigInvalidError } from "../errors/config-invalid-error.js";
 
-/** Lit et parse le JSON brut d'un fichier de configuration. */
+/** Read and parse raw JSON from a configuration file. */
 export function readConfigFile(filePath: string): unknown {
   const raw = readFileSync(filePath, "utf-8");
 
@@ -9,7 +9,7 @@ export function readConfigFile(filePath: string): unknown {
     return JSON.parse(raw) as unknown;
   } catch (cause) {
     throw new ConfigInvalidError(
-      `Le fichier de configuration n'est pas un JSON valide : ${filePath}`,
+      `Configuration file is not valid JSON: ${filePath}`,
       { cause },
     );
   }

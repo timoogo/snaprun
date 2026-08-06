@@ -8,7 +8,7 @@ const INDEX_BASENAME = "index";
 const EXCLUDED_BASENAMES = new Set(["_app", "_document", "_error", "_middleware"]);
 const API_DIRECTORY = "api";
 
-/** Découvre les pages d'un répertoire Pages Router (`pages/` ou `src/pages/`). */
+/** Discover pages in a Pages Router directory (`pages/` or `src/pages/`). */
 export async function discoverPagesRoutes(pagesDir: string): Promise<DiscoveredRoute[]> {
   const routes: DiscoveredRoute[] = [];
   await walk(pagesDir, [], true);
