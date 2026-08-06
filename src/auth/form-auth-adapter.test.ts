@@ -11,7 +11,7 @@ import {
   VALID_PASSWORD,
   VALID_PASSWORD_2,
   type FakeAuthServer,
-} from "./fake-auth-server.js";
+} from "../testing/fake-auth-server.js";
 import { FormAuthAdapter } from "./form-auth-adapter.js";
 
 const SELECTORS = {

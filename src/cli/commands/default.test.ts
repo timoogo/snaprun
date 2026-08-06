@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   startFakeSnapshotServer,
   type FakeSnapshotServer,
-} from "../../snapshots/fake-snapshot-server.js";
+} from "../../testing/fake-snapshot-server.js";
 import { createProgram } from "../program.js";
 
 describe("registerDefaultCommand", () => {

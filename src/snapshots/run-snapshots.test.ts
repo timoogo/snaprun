@@ -7,7 +7,7 @@ import { BaseUrlMissingError } from "../errors/base-url-missing-error.js";
 import { ConfigNotFoundError } from "../errors/config-not-found-error.js";
 import { RunNotFoundError } from "../errors/run-not-found-error.js";
 import { computeSnapshotFilePath } from "./compute-snapshot-file-path.js";
-import { startFakeSnapshotServer, type FakeSnapshotServer } from "./fake-snapshot-server.js";
+import { startFakeSnapshotServer, type FakeSnapshotServer } from "../testing/fake-snapshot-server.js";
 import { runSnapshots } from "./run-snapshots.js";
 
 describe("runSnapshots", () => {

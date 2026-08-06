@@ -1,17 +1,37 @@
 {
-  "name": "snaprun",
+  "name": "@timoogo/snaprun",
   "version": "0.1.0",
   "description": "SnapRun — outil de scan et de snapshot automatisé d'applications Next.js.",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/timoogo/snaprun.git"
+  },
+  "homepage": "https://github.com/timoogo/snaprun#readme",
+  "bugs": {
+    "url": "https://github.com/timoogo/snaprun/issues"
+  },
+  "author": "Timothée Gaultier",
+  "keywords": [
+    "nextjs",
+    "playwright",
+    "snapshot",
+    "screenshots",
+    "visual-testing",
+    "automation",
+    "cli"
+  ],
   "engines": {
     "node": ">=20"
   },
   "bin": {
-    "snaprun": "./dist/index.js"
+    "snaprun": "dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "generate:version": "node scripts/generate-version.mjs",
@@ -41,5 +61,8 @@
     "typescript": "^5.6.2",
     "typescript-eslint": "^8.8.0",
     "vitest": "^2.1.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

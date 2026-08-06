@@ -6,7 +6,7 @@ import { chromium, type Browser, type BrowserContext } from "playwright";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { RawDynamicRoute, RawStaticRoute } from "../types/route.js";
 import { captureRoute } from "./capture-route.js";
-import { startFakeSnapshotServer, type FakeSnapshotServer } from "./fake-snapshot-server.js";
+import { startFakeSnapshotServer, type FakeSnapshotServer } from "../testing/fake-snapshot-server.js";
 
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
