@@ -43,6 +43,7 @@ describe("configSchema", () => {
         output: { directory: "./snapshots", fullPage: true, structure: "flat" },
         routes: [],
         runs: [],
+        execution: { concurrency: 4, collisionStrategy: "prompt" },
       });
     }
   });
@@ -185,5 +186,51 @@ describe("configSchema", () => {
     ];
 
     expect(configSchema.safeParse(config).success).toBe(false);
+  });
+
+  it("applique les valeurs execution par défaut quand 'execution' est absent (RFC-014/014.5)", () => {
+    const result = configSchema.safeParse({ project: {} });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.execution).toEqual({ concurrency: 4, collisionStrategy: "prompt" });
+    }
+  });
+
+  it("accepte chaque valeur de execution.collisionStrategy (RFC-014.5)", () => {
+    for (const strategy of ["prompt", "serialize", "error"]) {
+      const result = configSchema.safeParse({ project: {}, execution: { collisionStrategy: strategy } });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.execution.collisionStrategy).toBe(strategy);
+      }
+    }
+  });
+
+  it("rejette une execution.collisionStrategy inconnue (RFC-014.5)", () => {
+    expect(
+      configSchema.safeParse({ project: {}, execution: { collisionStrategy: "merge" } }).success,
+    ).toBe(false);
+  });
+
+  it("accepte une valeur execution.concurrency explicite (RFC-014)", () => {
+    const result = configSchema.safeParse({ project: {}, execution: { concurrency: 2 } });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.execution.concurrency).toBe(2);
+    }
+  });
+
+  it("rejette execution.concurrency < 1 (RFC-014)", () => {
+    expect(configSchema.safeParse({ project: {}, execution: { concurrency: 0 } }).success).toBe(
+      false,
+    );
+  });
+
+  it("rejette execution.concurrency non entier (RFC-014)", () => {
+    expect(configSchema.safeParse({ project: {}, execution: { concurrency: 2.5 } }).success).toBe(
+      false,
+    );
   });
 });

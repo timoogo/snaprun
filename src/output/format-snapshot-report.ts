@@ -14,6 +14,29 @@ export function formatSnapshotReport(report: SnapshotReport): string {
     lines.push(...report.standalone.map(formatSnapshotLine));
   }
 
+  if (report.skipped !== undefined && report.skipped.length > 0) {
+    lines.push(`Skipped (collision) (${report.skipped.length})`);
+    lines.push(
+      ...report.skipped.map((capture) => {
+        const runLabel = capture.runName !== undefined ? `${capture.runName}/` : "";
+        return `  - ${runLabel}${capture.routeId} -> ${capture.filePath}`;
+      }),
+    );
+  }
+
+  if (report.collisions !== undefined && report.collisions.length > 0) {
+    lines.push(`Output collisions (${report.collisions.length})`);
+    for (const collision of report.collisions) {
+      lines.push(`  ${collision.filePath}`);
+      lines.push(
+        ...collision.captures.map((capture) => {
+          const runLabel = capture.runName !== undefined ? `${capture.runName}/` : "";
+          return `    - ${runLabel}${capture.routeId}`;
+        }),
+      );
+    }
+  }
+
   if (report.failure !== undefined) {
     const runLabel = report.failure.runName !== undefined ? ` (run ${report.failure.runName})` : "";
     lines.push(`Failed: ${report.failure.routeId}${runLabel} - ${report.failure.message}`);

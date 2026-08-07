@@ -15,6 +15,14 @@ describe("createDefaultConfig", () => {
     expect(config.auth).toBeDefined();
     expect(config.routes).toBeDefined();
     expect(config.runs).toBeDefined();
+    expect(config.execution).toBeDefined();
+  });
+
+  it("expose execution (concurrency + collisionStrategy) dans la configuration générée (RFC-014/014.5)", () => {
+    expect(createDefaultConfig().execution).toEqual({
+      concurrency: 4,
+      collisionStrategy: "prompt",
+    });
   });
 
   it("n'invente aucune route ni run (routes et runs vides, RFC-013 §11)", () => {

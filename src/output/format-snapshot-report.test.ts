@@ -63,4 +63,53 @@ describe("formatSnapshotReport", () => {
 
     expect(formatSnapshotReport(report)).toContain("Failed: bad - boom");
   });
+
+  it("liste les collisions de sortie séparément des échecs (RFC-014.5)", () => {
+    const report: SnapshotReport = {
+      succeeded: true,
+      durationMs: 9,
+      runs: [],
+      standalone: [],
+      failure: undefined,
+      collisions: [
+        {
+          filePath: "/out/run/2026/dashboard/page.png",
+          captures: [
+            { routeId: "dashboard", runName: "member" },
+            { routeId: "dashboard", runName: "admin" },
+          ],
+        },
+      ],
+    };
+
+    const output = formatSnapshotReport(report);
+
+    expect(output).toContain("Output collisions (1)");
+    expect(output).toContain("/out/run/2026/dashboard/page.png");
+    expect(output).toContain("- member/dashboard");
+    expect(output).toContain("- admin/dashboard");
+  });
+
+  it("liste les captures ignorées pour cause de collision (RFC-014.5)", () => {
+    const report: SnapshotReport = {
+      succeeded: true,
+      durationMs: 9,
+      runs: [],
+      standalone: [],
+      failure: undefined,
+      skipped: [
+        {
+          routeId: "dashboard",
+          runName: "member",
+          filePath: "/out/run/2026/dashboard/page.png",
+          reason: "collision",
+        },
+      ],
+    };
+
+    const output = formatSnapshotReport(report);
+
+    expect(output).toContain("Skipped (collision) (1)");
+    expect(output).toContain("- member/dashboard -> /out/run/2026/dashboard/page.png");
+  });
 });

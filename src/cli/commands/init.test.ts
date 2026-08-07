@@ -71,10 +71,11 @@ describe("snaprun init", () => {
     >;
 
     expect(Object.keys(data).sort()).toEqual(
-      ["auth", "output", "project", "routes", "runs"].sort(),
+      ["auth", "execution", "output", "project", "routes", "runs"].sort(),
     );
     expect(data["routes"]).toEqual([]);
     expect(data["runs"]).toEqual([]);
+    expect(data["execution"]).toEqual({ concurrency: 4, collisionStrategy: "prompt" });
   });
 
   it("n'écrase pas silencieusement un fichier existant (RFC-013 §13)", async () => {

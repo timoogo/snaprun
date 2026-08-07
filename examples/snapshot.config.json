@@ -9,6 +9,10 @@
     "directory": "./snapshots",
     "fullPage": true
   },
+  "execution": {
+    "concurrency": 4,
+    "collisionStrategy": "prompt"
+  },
   "auth": {
     "loginRoute": "/login",
     "selectors": {
