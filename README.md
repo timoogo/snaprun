@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/banner.png" alt="SnapRun banner">
+</p>
+
 # SnapRun
 
 [![npm version](https://img.shields.io/npm/v/@timoogo/snaprun.svg)](https://www.npmjs.com/package/@timoogo/snaprun)
