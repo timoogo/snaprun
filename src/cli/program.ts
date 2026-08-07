@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { CLI_DESCRIPTION, CLI_NAME, CLI_VERSION } from "../generated/version.js";
 import { registerDefaultCommand } from "./commands/default.js";
+import { registerInitCommand } from "./commands/init.js";
 import { registerScanCommand } from "./commands/scan.js";
 
 /** Build the SnapRun CLI program. */
@@ -22,11 +23,13 @@ Examples:
   snaprun --runName smoke
   snaprun --route /account
   snaprun scan
+  snaprun init
 `,
     );
 
   registerDefaultCommand(program);
   registerScanCommand(program);
+  registerInitCommand(program);
 
   return program;
 }

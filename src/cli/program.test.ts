@@ -15,6 +15,12 @@ describe("createProgram", () => {
     expect(program.commands.map((command) => command.name())).toContain("scan");
   });
 
+  it("enregistre la commande init (RFC-013)", () => {
+    const program = createProgram();
+
+    expect(program.commands.map((command) => command.name())).toContain("init");
+  });
+
   it("affiche l'aide sans erreur", () => {
     const program = createProgram();
 

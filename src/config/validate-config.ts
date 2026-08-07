@@ -1,5 +1,6 @@
 import { configSchema } from "../schemas/config.js";
 import { ConfigInvalidError } from "../errors/config-invalid-error.js";
+import { formatConfigIssues } from "./format-config-issues.js";
 import type { RawConfig } from "../types/config.js";
 
 /** Validate raw configuration file data with Zod. */
@@ -8,7 +9,7 @@ export function validateConfig(data: unknown, filePath: string): RawConfig {
 
   if (!result.success) {
     throw new ConfigInvalidError(
-      `Configuration does not match the expected schema: ${filePath}`,
+      `Invalid configuration: ${filePath}\n\n${formatConfigIssues(result.error)}`,
       { cause: result.error },
     );
   }
